@@ -5,6 +5,24 @@ document.addEventListener("DOMContentLoaded", function () {
   const $ = (id) => document.getElementById(id);
   const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
 
+  // -----------------------------
+  // GOOGLE LOGIN FIX
+  // -----------------------------
+  const googleLoginBtn = $("btn-google-login");
+
+  if (googleLoginBtn) {
+    googleLoginBtn.setAttribute("href", "/auth/login/google-oauth2/");
+
+    googleLoginBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+
+      // Important:
+      // Login must start here.
+      // Do NOT redirect to /auth/complete/google-oauth2/
+      window.location.href = "/auth/login/google-oauth2/";
+    });
+  }
+
   const login = $("page-login");
   const app = $("app");
 
@@ -74,9 +92,9 @@ document.addEventListener("DOMContentLoaded", function () {
     expenses = [];
     investments = [];
 
-    $("modal-reset").classList.add("hidden");
-    $("input-name").value = defaultNameFromEmail();
-    $("modal-name").classList.remove("hidden");
+    if ($("modal-reset")) $("modal-reset").classList.add("hidden");
+    if ($("input-name")) $("input-name").value = defaultNameFromEmail();
+    if ($("modal-name")) $("modal-name").classList.remove("hidden");
 
     renderAll();
   }
@@ -84,6 +102,10 @@ document.addEventListener("DOMContentLoaded", function () {
   function setTheme(theme) {
     root.setAttribute("data-theme", theme);
     localStorage.setItem("wealth_theme", theme);
+
+    document.querySelectorAll(".theme-toggle").forEach((btn) => {
+      btn.textContent = theme === "dark" ? "☀️" : "🌙";
+    });
   }
 
   setTheme(localStorage.getItem("wealth_theme") || "light");
@@ -98,17 +120,23 @@ document.addEventListener("DOMContentLoaded", function () {
   if ($("btn-see-more")) {
     $("btn-see-more").addEventListener("click", () => {
       $("more-info").classList.toggle("hidden");
-      $("btn-see-more").textContent = $("more-info").classList.contains("hidden") ? "See more" : "See less";
+      $("btn-see-more").textContent = $("more-info").classList.contains("hidden")
+        ? "See more"
+        : "See less";
     });
   }
 
   function showLogin() {
+    if (!login || !app) return;
+
     login.classList.remove("hidden");
     login.classList.add("active");
     app.classList.add("hidden");
   }
 
   function showApp() {
+    if (!login || !app) return;
+
     loadUserData();
 
     login.classList.add("hidden");
@@ -119,18 +147,18 @@ document.addEventListener("DOMContentLoaded", function () {
     renderAll();
 
     if (!hasSavedName()) {
-      $("input-name").value = getName();
-      $("modal-name").classList.remove("hidden");
+      if ($("input-name")) $("input-name").value = getName();
+      if ($("modal-name")) $("modal-name").classList.remove("hidden");
     }
   }
 
   function updateUserUI() {
     const name = getName();
 
-    $("display-name").textContent = name;
-    $("inv-display-name").textContent = name;
-    $("dash-avatar").textContent = name.charAt(0).toUpperCase();
-    $("logged-email").textContent = currentEmail;
+    if ($("display-name")) $("display-name").textContent = name;
+    if ($("inv-display-name")) $("inv-display-name").textContent = name;
+    if ($("dash-avatar")) $("dash-avatar").textContent = name.charAt(0).toUpperCase();
+    if ($("logged-email")) $("logged-email").textContent = currentEmail;
   }
 
   if (djangoAuth && djangoEmail) {
@@ -149,165 +177,201 @@ document.addEventListener("DOMContentLoaded", function () {
     showLogin();
   }
 
-  $("btn-email-login").addEventListener("click", () => {
-    const email = cleanEmail($("input-email-login").value);
+  if ($("btn-email-login")) {
+    $("btn-email-login").addEventListener("click", () => {
+      const email = cleanEmail($("input-email-login").value);
 
-    if (!email.includes("@") || !email.includes(".")) {
-      $("email-error").textContent = "Enter a valid email address";
-      return;
-    }
+      if (!email.includes("@") || !email.includes(".")) {
+        $("email-error").textContent = "Enter a valid email address";
+        return;
+      }
 
-    $("email-error").textContent = "";
+      $("email-error").textContent = "";
 
-    currentEmail = email;
-    localStorage.setItem("wealth_logged_in", "true");
-    localStorage.setItem("wealth_current_email", email);
+      currentEmail = email;
+      localStorage.setItem("wealth_logged_in", "true");
+      localStorage.setItem("wealth_current_email", email);
 
-    showApp();
-  });
+      showApp();
+    });
+  }
 
-  $("btn-logout").addEventListener("click", (e) => {
-    localStorage.removeItem("wealth_logged_in");
-    localStorage.removeItem("wealth_current_email");
+  if ($("btn-logout")) {
+    $("btn-logout").addEventListener("click", (e) => {
+      localStorage.removeItem("wealth_logged_in");
+      localStorage.removeItem("wealth_current_email");
 
-    if (!djangoAuth) {
-      e.preventDefault();
-      currentEmail = "";
-      showLogin();
-    }
-  });
+      if (!djangoAuth) {
+        e.preventDefault();
+        currentEmail = "";
+        showLogin();
+      }
+    });
+  }
 
-  $("btn-edit-name").addEventListener("click", () => {
-    $("input-name").value = getName();
-    $("modal-name").classList.remove("hidden");
-  });
+  if ($("btn-edit-name")) {
+    $("btn-edit-name").addEventListener("click", () => {
+      $("input-name").value = getName();
+      $("modal-name").classList.remove("hidden");
+    });
+  }
 
-  $("btn-save-name").addEventListener("click", () => {
-    const name = $("input-name").value.trim();
-    if (!name) return;
+  if ($("btn-save-name")) {
+    $("btn-save-name").addEventListener("click", () => {
+      const name = $("input-name").value.trim();
+      if (!name) return;
 
-    setName(name);
-    $("modal-name").classList.add("hidden");
-    updateUserUI();
-  });
+      setName(name);
+      $("modal-name").classList.add("hidden");
+      updateUserUI();
+    });
+  }
 
-  $("btn-close-name").addEventListener("click", () => {
-    if (!hasSavedName()) {
-      setName(getName());
-    }
+  if ($("btn-close-name")) {
+    $("btn-close-name").addEventListener("click", () => {
+      if (!hasSavedName()) {
+        setName(getName());
+      }
 
-    $("modal-name").classList.add("hidden");
-    updateUserUI();
-  });
+      $("modal-name").classList.add("hidden");
+      updateUserUI();
+    });
+  }
 
-  $("btn-clear-name").addEventListener("click", () => {
-    $("input-name").value = "";
-    $("input-name").focus();
-  });
+  if ($("btn-clear-name")) {
+    $("btn-clear-name").addEventListener("click", () => {
+      $("input-name").value = "";
+      $("input-name").focus();
+    });
+  }
 
-  $("btn-open-reset").addEventListener("click", () => {
-    $("reset-robot-check").checked = false;
-    $("reset-name-input").value = "";
-    $("reset-error").textContent = "";
-    $("reset-confirm-name").textContent = getName();
-    $("modal-reset").classList.remove("hidden");
-  });
+  if ($("btn-open-reset")) {
+    $("btn-open-reset").addEventListener("click", () => {
+      $("reset-robot-check").checked = false;
+      $("reset-name-input").value = "";
+      $("reset-error").textContent = "";
+      $("reset-confirm-name").textContent = getName();
+      $("modal-reset").classList.remove("hidden");
+    });
+  }
 
-  $("btn-close-reset").addEventListener("click", () => {
-    $("modal-reset").classList.add("hidden");
-  });
+  if ($("btn-close-reset")) {
+    $("btn-close-reset").addEventListener("click", () => {
+      $("modal-reset").classList.add("hidden");
+    });
+  }
 
-  $("btn-confirm-reset").addEventListener("click", () => {
-    const robotOk = $("reset-robot-check").checked;
-    const typedName = $("reset-name-input").value.trim().toLowerCase();
-    const actualName = getName().trim().toLowerCase();
+  if ($("btn-confirm-reset")) {
+    $("btn-confirm-reset").addEventListener("click", () => {
+      const robotOk = $("reset-robot-check").checked;
+      const typedName = $("reset-name-input").value.trim().toLowerCase();
+      const actualName = getName().trim().toLowerCase();
 
-    if (!robotOk) {
-      $("reset-error").textContent = "Please tick: I am not a robot";
-      return;
-    }
+      if (!robotOk) {
+        $("reset-error").textContent = "Please tick: I am not a robot";
+        return;
+      }
 
-    if (typedName !== actualName) {
-      $("reset-error").textContent = "Name does not match";
-      return;
-    }
+      if (typedName !== actualName) {
+        $("reset-error").textContent = "Name does not match";
+        return;
+      }
 
-    resetCurrentUserValues();
-  });
+      resetCurrentUserValues();
+    });
+  }
 
   function setPage(num) {
     const isPage2 = num === 2;
 
-    $("pg-dashboard").classList.toggle("active", !isPage2);
-    $("pg-investments").classList.toggle("active", isPage2);
+    if ($("pg-dashboard")) $("pg-dashboard").classList.toggle("active", !isPage2);
+    if ($("pg-investments")) $("pg-investments").classList.toggle("active", isPage2);
 
-    $("bnav-1").classList.toggle("active", !isPage2);
-    $("bnav-2").classList.toggle("active", isPage2);
+    if ($("bnav-1")) $("bnav-1").classList.toggle("active", !isPage2);
+    if ($("bnav-2")) $("bnav-2").classList.toggle("active", isPage2);
 
-    $("dot-1").classList.toggle("active", !isPage2);
-    $("dot-2").classList.toggle("active", isPage2);
+    if ($("dot-1")) $("dot-1").classList.toggle("active", !isPage2);
+    if ($("dot-2")) $("dot-2").classList.toggle("active", isPage2);
 
-    $("btn-top-page").textContent = isPage2 ? "← Page 1" : "Page 2 →";
+    if ($("btn-top-page")) {
+      $("btn-top-page").textContent = isPage2 ? "← Page 1" : "Page 2 →";
+    }
   }
 
-  $("btn-top-page").addEventListener("click", () => {
-    const isPage2 = $("pg-investments").classList.contains("active");
-    setPage(isPage2 ? 1 : 2);
-  });
+  if ($("btn-top-page")) {
+    $("btn-top-page").addEventListener("click", () => {
+      const isPage2 = $("pg-investments").classList.contains("active");
+      setPage(isPage2 ? 1 : 2);
+    });
+  }
 
-  $("bnav-1").addEventListener("click", () => setPage(1));
-  $("bnav-2").addEventListener("click", () => setPage(2));
+  if ($("bnav-1")) $("bnav-1").addEventListener("click", () => setPage(1));
+  if ($("bnav-2")) $("bnav-2").addEventListener("click", () => setPage(2));
 
-  $("btn-edit-income").addEventListener("click", () => {
-    $("input-income").value = getIncome();
-    $("income-panel").classList.remove("hidden");
-  });
+  if ($("btn-edit-income")) {
+    $("btn-edit-income").addEventListener("click", () => {
+      $("input-income").value = getIncome();
+      $("income-panel").classList.remove("hidden");
+    });
+  }
 
-  $("btn-cancel-income").addEventListener("click", () => {
-    $("income-panel").classList.add("hidden");
-  });
+  if ($("btn-cancel-income")) {
+    $("btn-cancel-income").addEventListener("click", () => {
+      $("income-panel").classList.add("hidden");
+    });
+  }
 
-  $("btn-save-income").addEventListener("click", () => {
-    setIncome($("input-income").value);
-    $("income-panel").classList.add("hidden");
-    renderAll();
-  });
+  if ($("btn-save-income")) {
+    $("btn-save-income").addEventListener("click", () => {
+      setIncome($("input-income").value);
+      $("income-panel").classList.add("hidden");
+      renderAll();
+    });
+  }
 
-  $("btn-add-expense").addEventListener("click", () => {
-    editingExpense = null;
-    $("expense-form-title").textContent = "New Expense";
-    $("exp-title").value = "";
-    $("exp-amount").value = "";
-    $("expense-form").classList.remove("hidden");
-  });
+  if ($("btn-add-expense")) {
+    $("btn-add-expense").addEventListener("click", () => {
+      editingExpense = null;
+      $("expense-form-title").textContent = "New Expense";
+      $("exp-title").value = "";
+      $("exp-amount").value = "";
+      $("expense-form").classList.remove("hidden");
+    });
+  }
 
-  $("btn-cancel-expense").addEventListener("click", () => {
-    $("expense-form").classList.add("hidden");
-  });
+  if ($("btn-cancel-expense")) {
+    $("btn-cancel-expense").addEventListener("click", () => {
+      $("expense-form").classList.add("hidden");
+    });
+  }
 
-  $("btn-save-expense").addEventListener("click", () => {
-    const title = $("exp-title").value.trim();
-    const amount = Number($("exp-amount").value || 0);
+  if ($("btn-save-expense")) {
+    $("btn-save-expense").addEventListener("click", () => {
+      const title = $("exp-title").value.trim();
+      const amount = Number($("exp-amount").value || 0);
 
-    if (!title || amount <= 0) return;
+      if (!title || amount <= 0) return;
 
-    const item = { title, amount };
+      const item = { title, amount };
 
-    if (editingExpense === null) {
-      expenses.push(item);
-    } else {
-      expenses[editingExpense] = item;
-    }
+      if (editingExpense === null) {
+        expenses.push(item);
+      } else {
+        expenses[editingExpense] = item;
+      }
 
-    editingExpense = null;
-    $("expense-form").classList.add("hidden");
+      editingExpense = null;
+      $("expense-form").classList.add("hidden");
 
-    saveUserData();
-    renderAll();
-  });
+      saveUserData();
+      renderAll();
+    });
+  }
 
   function renderExpenses() {
     const list = $("expenses-list");
+    if (!list) return;
+
     list.innerHTML = "";
 
     if (expenses.length === 0) {
@@ -361,11 +425,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateInvestmentFields() {
+    if (!$("inv-category")) return;
+
     const category = $("inv-category").value;
 
-    $("normal-invest-wrap").classList.add("hidden");
-    $("gold-invest-wrap").classList.add("hidden");
-    $("bank-invest-wrap").classList.add("hidden");
+    if ($("normal-invest-wrap")) $("normal-invest-wrap").classList.add("hidden");
+    if ($("gold-invest-wrap")) $("gold-invest-wrap").classList.add("hidden");
+    if ($("bank-invest-wrap")) $("bank-invest-wrap").classList.add("hidden");
 
     if (category === "Gold") {
       $("gold-invest-wrap").classList.remove("hidden");
@@ -392,107 +458,115 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  $("inv-category").addEventListener("change", updateInvestmentFields);
+  if ($("inv-category")) {
+    $("inv-category").addEventListener("change", updateInvestmentFields);
+  }
 
-  $("btn-add-investment").addEventListener("click", () => {
-    editingInvestment = null;
-    $("inv-form-title").textContent = "New Investment";
+  if ($("btn-add-investment")) {
+    $("btn-add-investment").addEventListener("click", () => {
+      editingInvestment = null;
+      $("inv-form-title").textContent = "New Investment";
 
-    $("inv-title").value = "";
-    $("inv-category").value = "";
+      $("inv-title").value = "";
+      $("inv-category").value = "";
 
-    $("inv-amount").value = "";
-    $("inv-return").value = "";
+      $("inv-amount").value = "";
+      $("inv-return").value = "";
 
-    $("gold-digital").value = "";
-    $("gold-physical").value = "";
+      $("gold-digital").value = "";
+      $("gold-physical").value = "";
 
-    $("bank-principal").value = "";
-    $("bank-interest").value = "";
-    $("bank-duration").value = "";
-    $("bank-return").value = "";
+      $("bank-principal").value = "";
+      $("bank-interest").value = "";
+      $("bank-duration").value = "";
+      $("bank-return").value = "";
 
-    updateInvestmentFields();
-    $("investment-form").classList.remove("hidden");
-  });
+      updateInvestmentFields();
+      $("investment-form").classList.remove("hidden");
+    });
+  }
 
-  $("btn-cancel-investment").addEventListener("click", () => {
-    $("investment-form").classList.add("hidden");
-  });
+  if ($("btn-cancel-investment")) {
+    $("btn-cancel-investment").addEventListener("click", () => {
+      $("investment-form").classList.add("hidden");
+    });
+  }
 
-  $("btn-save-investment").addEventListener("click", () => {
-    const title = $("inv-title").value.trim();
-    const category = $("inv-category").value;
+  if ($("btn-save-investment")) {
+    $("btn-save-investment").addEventListener("click", () => {
+      const title = $("inv-title").value.trim();
+      const category = $("inv-category").value;
 
-    if (!title || !category) return;
+      if (!title || !category) return;
 
-    let item = {
-      title,
-      category,
-      amount: 0
-    };
+      let item = {
+        title,
+        category,
+        amount: 0
+      };
 
-    if (category === "Gold") {
-      const digitalGold = Number($("gold-digital").value || 0);
-      const physicalGold = Number($("gold-physical").value || 0);
-      const total = digitalGold + physicalGold;
+      if (category === "Gold") {
+        const digitalGold = Number($("gold-digital").value || 0);
+        const physicalGold = Number($("gold-physical").value || 0);
+        const total = digitalGold + physicalGold;
 
-      if (total <= 0) return;
+        if (total <= 0) return;
 
-      item.digitalGold = digitalGold;
-      item.physicalGold = physicalGold;
-      item.amount = total;
-    } else if (category === "FD") {
-      const principal = Number($("bank-principal").value || 0);
-      const interest = Number($("bank-interest").value || 0);
-      const duration = Number($("bank-duration").value || 0);
-      const returnAmount = Number($("bank-return").value || 0);
+        item.digitalGold = digitalGold;
+        item.physicalGold = physicalGold;
+        item.amount = total;
+      } else if (category === "FD") {
+        const principal = Number($("bank-principal").value || 0);
+        const interest = Number($("bank-interest").value || 0);
+        const duration = Number($("bank-duration").value || 0);
+        const returnAmount = Number($("bank-return").value || 0);
 
-      if (principal <= 0 || duration <= 0) return;
+        if (principal <= 0 || duration <= 0) return;
 
-      item.principal = principal;
-      item.interest = interest;
-      item.duration = duration;
-      item.returnAmount = returnAmount;
-      item.amount = principal;
-    } else if (category === "RD") {
-      const monthlyAmount = Number($("bank-principal").value || 0);
-      const interest = Number($("bank-interest").value || 0);
-      const duration = Number($("bank-duration").value || 0);
-      const returnAmount = Number($("bank-return").value || 0);
-      const totalInvestment = monthlyAmount * duration;
+        item.principal = principal;
+        item.interest = interest;
+        item.duration = duration;
+        item.returnAmount = returnAmount;
+        item.amount = principal;
+      } else if (category === "RD") {
+        const monthlyAmount = Number($("bank-principal").value || 0);
+        const interest = Number($("bank-interest").value || 0);
+        const duration = Number($("bank-duration").value || 0);
+        const returnAmount = Number($("bank-return").value || 0);
+        const totalInvestment = monthlyAmount * duration;
 
-      if (monthlyAmount <= 0 || duration <= 0) return;
+        if (monthlyAmount <= 0 || duration <= 0) return;
 
-      item.monthlyAmount = monthlyAmount;
-      item.interest = interest;
-      item.duration = duration;
-      item.returnAmount = returnAmount;
-      item.amount = totalInvestment;
-    } else {
-      const amount = Number($("inv-amount").value || 0);
+        item.monthlyAmount = monthlyAmount;
+        item.interest = interest;
+        item.duration = duration;
+        item.returnAmount = returnAmount;
+        item.amount = totalInvestment;
+      } else {
+        const amount = Number($("inv-amount").value || 0);
 
-      if (amount <= 0) return;
+        if (amount <= 0) return;
 
-      item.amount = amount;
+        item.amount = amount;
 
-      if (category === "Stock" || category === "Mutual Fund") {
-        item.expectedReturn = Number($("inv-return").value || 0);
+        if (category === "Stock" || category === "Mutual Fund") {
+          item.expectedReturn = Number($("inv-return").value || 0);
+        }
       }
-    }
 
-    if (editingInvestment === null) {
-      investments.push(item);
-    } else {
-      investments[editingInvestment] = item;
-    }
+      if (editingInvestment === null) {
+        investments.push(item);
+      } else {
+        investments[editingInvestment] = item;
+      }
 
-    editingInvestment = null;
-    $("investment-form").classList.add("hidden");
+      editingInvestment = null;
+      $("investment-form").classList.add("hidden");
 
-    saveUserData();
-    renderAll();
-  });
+      saveUserData();
+      renderAll();
+    });
+  }
 
   document.querySelectorAll(".cat-tab").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -525,6 +599,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function renderInvestments() {
     const list = $("investments-list");
+    if (!list) return;
+
     list.innerHTML = "";
 
     const filtered =
@@ -607,12 +683,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const pct = income > 0 ? Math.max(0, Math.round((savings / income) * 100)) : 0;
     const totalInv = investments.reduce((sum, item) => sum + Number(item.amount), 0);
 
-    $("sum-income").textContent = money(income);
-    $("sum-expenses").textContent = money(totalExpenses);
-    $("sum-savings").textContent = money(savings);
-    $("savings-pct").textContent = pct + "%";
-    $("sb-fill").style.width = Math.min(pct, 100) + "%";
-    $("inv-total").textContent = money(totalInv);
+    if ($("sum-income")) $("sum-income").textContent = money(income);
+    if ($("sum-expenses")) $("sum-expenses").textContent = money(totalExpenses);
+    if ($("sum-savings")) $("sum-savings").textContent = money(savings);
+    if ($("savings-pct")) $("savings-pct").textContent = pct + "%";
+    if ($("sb-fill")) $("sb-fill").style.width = Math.min(pct, 100) + "%";
+    if ($("inv-total")) $("inv-total").textContent = money(totalInv);
   }
 
   function renderAll() {
