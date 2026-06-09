@@ -83,3 +83,10 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = True
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SECURE = True
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"

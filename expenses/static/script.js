@@ -5,23 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const $ = (id) => document.getElementById(id);
   const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
 
-  // -----------------------------
-  // GOOGLE LOGIN FIX
-  // -----------------------------
-  const googleLoginBtn = $("btn-google-login");
 
-  if (googleLoginBtn) {
-    googleLoginBtn.setAttribute("href", "/auth/login/google-oauth2/");
-
-    googleLoginBtn.addEventListener("click", function (e) {
-      e.preventDefault();
-
-      // Important:
-      // Login must start here.
-      // Do NOT redirect to /auth/complete/google-oauth2/
-      window.location.href = "/auth/login/google-oauth2/";
-    });
-  }
 
   const login = $("page-login");
   const app = $("app");
