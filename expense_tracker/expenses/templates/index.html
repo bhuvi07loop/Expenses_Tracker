@@ -1,0 +1,412 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Wealth Tracker</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+<body
+  data-django-auth="{% if user.is_authenticated %}true{% else %}false{% endif %}"
+  data-django-email="{% if user.is_authenticated %}{% if user.email %}{{ user.email }}{% else %}{{ user.username }}{% endif %}{% endif %}"
+>
+
+  <!-- LOGIN PAGE -->
+  <div id="page-login" class="page active">
+
+    <button class="theme-float theme-toggle" id="theme-toggle-login" title="Toggle theme">
+      <span class="icon-sun">☀️</span>
+      <span class="icon-moon">🌙</span>
+    </button>
+
+    <div class="login-bg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+
+    <section class="login-shell">
+      <div class="brand-block">
+        <div class="brand-icon">₹</div>
+        <div>
+          <p class="brand-kicker">Personal finance dashboard</p>
+          <h1 class="brand-title">Wealth Tracker</h1>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-main">
+          <span class="info-dot"></span>
+          <span>Sign in to keep your values separate for each email.</span>
+          <button type="button" id="btn-see-more" class="see-more-btn">See more</button>
+        </div>
+
+        <p id="more-info" class="more-info hidden">
+          Same email shows the same income, expenses, and investments after logout.
+          A different email opens a separate account with different values.
+        </p>
+      </div>
+
+      <div class="quick-stats">
+        <div>
+          <strong>Income</strong>
+          <span>Monthly</span>
+        </div>
+        <div>
+          <strong>Expenses</strong>
+          <span>Track</span>
+        </div>
+        <div>
+          <strong>Invest</strong>
+          <span>Grow</span>
+        </div>
+      </div>
+
+      <div class="login-card">
+        <div class="login-card-head">
+          <h2>Welcome back</h2>
+          <p>Choose a sign in method to continue.</p>
+        </div>
+
+        <div class="login-actions">
+          <a class="btn-google" id="btn-google-login" href="{% url 'social:begin' 'google-oauth2' %}">
+            <svg width="20" height="20" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.2 30.3 0 24 0 14.8 0 6.9 5.4 3 13.3l7.9 6.2C12.8 13.2 17.9 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.5 3-2.2 5.5-4.7 7.2l7.3 5.7c4.3-4 6.8-9.9 7.2-16.9z"/>
+              <path fill="#FBBC05" d="M10.9 28.5C10.3 26.9 10 25.2 10 23.5s.3-3.4.9-5l-7.9-6.2C1.1 15.6 0 19.4 0 23.5s1.1 7.9 3 11.2l7.9-6.2z"/>
+              <path fill="#34A853" d="M24 47c6.3 0 11.6-2.1 15.4-5.7l-7.3-5.7c-2.1 1.4-4.8 2.2-8.1 2.2-6.1 0-11.2-3.7-13.1-9l-7.9 6.2C6.9 42.6 14.8 47 24 47z"/>
+            </svg>
+            Continue with Google
+          </a>
+
+          <div class="login-divider">
+            <span>or</span>
+          </div>
+
+          <div class="email-login-box">
+            <input type="email" id="input-email-login" class="ft-input" placeholder="Enter email address" autocomplete="email" />
+            <button class="btn-primary full" id="btn-email-login">Continue with Email</button>
+            <p class="email-error" id="email-error"></p>
+          </div>
+        </div>
+      </div>
+
+      <p class="designer-credit">~ designed by buvi 07</p>
+    </section>
+  </div>
+
+  <!-- NAME MODAL -->
+  <div id="modal-name" class="modal-overlay hidden">
+    <div class="modal-card name-card-pop">
+      <button type="button" class="modal-close-btn" id="btn-close-name" title="Close">×</button>
+
+      <div class="modal-icon">👋</div>
+      <h2>Welcome to Wealth Tracker!</h2>
+      <p>Your name is taken from your email. You can change it here.</p>
+
+      <div class="input-clear-wrap">
+        <input type="text" id="input-name" class="ft-input input-with-clear" placeholder="Your name" maxlength="30" autocomplete="off" />
+        <button type="button" class="input-clear-btn" id="btn-clear-name" title="Clear name">×</button>
+      </div>
+
+      <button class="btn-primary full" id="btn-save-name">Save Name</button>
+    </div>
+  </div>
+
+  <!-- RESET MODAL -->
+  <div id="modal-reset" class="modal-overlay hidden">
+    <div class="modal-card reset-card-pop">
+      <button type="button" class="modal-close-btn" id="btn-close-reset" title="Close">×</button>
+
+      <div class="modal-icon danger-icon">⚠️</div>
+      <h2>Reset your values?</h2>
+      <p>
+        This clears income, expenses, investments, and saved name only for this email.
+      </p>
+
+      <label class="robot-check">
+        <input type="checkbox" id="reset-robot-check">
+        <span>I am not a robot</span>
+      </label>
+
+      <p class="reset-small-text">
+        Type your name to confirm:
+        <strong id="reset-confirm-name">Your Name</strong>
+      </p>
+
+      <input type="text" id="reset-name-input" class="ft-input" placeholder="Type your name here" autocomplete="off" />
+
+      <p class="email-error" id="reset-error"></p>
+
+      <button class="btn-danger full" id="btn-confirm-reset">Reset Values</button>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app" class="hidden">
+
+    <nav class="topnav">
+      <button class="nav-icon-btn theme-toggle" id="theme-toggle" title="Toggle theme">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+      </button>
+
+      <div class="nav-logo">
+        <div class="nav-logo-icon">₹</div>
+        <span>Wealth Tracker</span>
+      </div>
+
+      <div class="nav-actions">
+        <span class="logged-email" id="logged-email"></span>
+        <button class="btn-reset" id="btn-open-reset">Reset</button>
+        <button class="btn-top-page" id="btn-top-page">Page 2 →</button>
+        <a class="btn-logout" id="btn-logout" href="{% url 'logout' %}">Logout</a>
+      </div>
+    </nav>
+
+    <!-- PAGE 1 -->
+    <div id="pg-dashboard" class="app-page active">
+      <main class="container">
+
+        <header class="dash-header">
+          <div>
+            <p class="greeting-label">Investment of</p>
+            <div class="greeting-name-row">
+              <h1 class="greeting-name" id="display-name">Your Name</h1>
+              <button class="small-round-btn" id="btn-edit-name" title="Edit name">✏️</button>
+            </div>
+          </div>
+          <div class="dash-avatar" id="dash-avatar">A</div>
+        </header>
+
+        <section class="summary-grid">
+          <div class="summary-card income-card">
+            <button class="card-edit-btn" id="btn-edit-income">✏️</button>
+            <div class="card-icon">💵</div>
+            <p class="sc-label">Monthly Income</p>
+            <h2 class="sc-value" id="sum-income">₹0</h2>
+          </div>
+
+          <div class="summary-card expense-card">
+            <div class="card-icon">🧾</div>
+            <p class="sc-label">Total Expenses</p>
+            <h2 class="sc-value" id="sum-expenses">₹0</h2>
+          </div>
+
+          <div class="summary-card savings-card">
+            <div class="card-icon">💰</div>
+            <p class="sc-label">Net Savings</p>
+            <h2 class="sc-value" id="sum-savings">₹0</h2>
+          </div>
+        </section>
+
+        <div id="income-panel" class="edit-panel hidden">
+          <div class="panel-inner">
+            <h3>Set Monthly Income</h3>
+            <div class="input-row">
+              <span class="input-prefix">₹</span>
+              <input type="number" id="input-income" class="ft-input" placeholder="e.g. 50000" min="0" />
+            </div>
+            <div class="btn-row">
+              <button class="btn-secondary" id="btn-cancel-income">Cancel</button>
+              <button class="btn-primary" id="btn-save-income">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <h2 class="section-title">Monthly Expenses</h2>
+          <button class="btn-primary small" id="btn-add-expense">+ Add</button>
+        </div>
+
+        <div id="expense-form" class="edit-panel hidden">
+          <div class="panel-inner">
+            <h3 id="expense-form-title">New Expense</h3>
+            <input type="text" id="exp-title" class="ft-input" placeholder="Expense title, e.g. Rent" maxlength="40" />
+            <div class="input-row">
+              <span class="input-prefix">₹</span>
+              <input type="number" id="exp-amount" class="ft-input" placeholder="Amount" min="0" />
+            </div>
+            <div class="btn-row">
+              <button class="btn-secondary" id="btn-cancel-expense">Cancel</button>
+              <button class="btn-primary" id="btn-save-expense">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="expenses-list" class="items-list"></div>
+
+        <section class="savings-bar-section">
+          <div class="sb-header">
+            <span>Savings Rate</span>
+            <span id="savings-pct" class="sb-pct">0%</span>
+          </div>
+          <div class="sb-track">
+            <div class="sb-fill" id="sb-fill"></div>
+          </div>
+        </section>
+
+        <p class="feedback-line">
+          Feedback:
+          <a href="mailto:bhuvanesh07web@gmail.com">bhuvanesh07web@gmail.com</a>
+        </p>
+
+      </main>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div id="pg-investments" class="app-page">
+      <main class="container">
+
+        <header class="dash-header">
+          <div>
+            <p class="greeting-label">Investments of</p>
+            <h1 class="greeting-name" id="inv-display-name">Your Name</h1>
+          </div>
+
+          <div class="inv-total-badge">
+            <p class="sc-label">Total Invested</p>
+            <h2 class="sc-value" id="inv-total">₹0</h2>
+          </div>
+        </header>
+
+        <div class="cat-tabs" id="cat-tabs">
+          <button class="cat-tab active" data-cat="all">All</button>
+          <button class="cat-tab" data-cat="Stock">Stocks</button>
+          <button class="cat-tab" data-cat="Gold">Gold</button>
+          <button class="cat-tab" data-cat="Mutual Fund">Mutual Funds</button>
+          <button class="cat-tab" data-cat="FD">FD</button>
+          <button class="cat-tab" data-cat="RD">RD</button>
+          <button class="cat-tab" data-cat="Other">Other</button>
+        </div>
+
+        <div class="section-header">
+          <h2 class="section-title">My Investments</h2>
+          <button class="btn-primary small" id="btn-add-investment">+ Add</button>
+        </div>
+
+        <div id="investment-form" class="edit-panel hidden">
+          <div class="panel-inner">
+            <h3 id="inv-form-title">New Investment</h3>
+
+            <input type="text" id="inv-title" class="ft-input" placeholder="Investment name" maxlength="40" />
+
+            <select id="inv-category" class="ft-input ft-select">
+              <option value="">Select category</option>
+              <option value="Stock">📈 Stock</option>
+              <option value="Gold">🥇 Gold</option>
+              <option value="Mutual Fund">📊 Mutual Fund</option>
+              <option value="FD">🏦 Fixed Deposit FD</option>
+              <option value="RD">📅 Recurring Deposit RD</option>
+              <option value="Crypto">₿ Crypto</option>
+              <option value="Real Estate">🏠 Real Estate</option>
+              <option value="Other">💼 Other</option>
+            </select>
+
+            <div id="normal-invest-wrap">
+              <div class="input-row">
+                <span class="input-prefix">₹</span>
+                <input type="number" id="inv-amount" class="ft-input" placeholder="Amount invested" min="0" />
+              </div>
+
+              <div id="inv-return-wrap">
+                <label class="ft-label">Expected Return % per year</label>
+                <div class="input-row">
+                  <input type="number" id="inv-return" class="ft-input" placeholder="e.g. 12" min="0" max="100" step="0.1" />
+                  <span class="input-suffix">%</span>
+                </div>
+                <p class="ft-hint">For stocks and mutual funds</p>
+              </div>
+            </div>
+
+            <div id="gold-invest-wrap" class="hidden">
+              <label class="ft-label">Digital Gold Amount</label>
+              <div class="input-row">
+                <span class="input-prefix">₹</span>
+                <input type="number" id="gold-digital" class="ft-input" placeholder="Digital gold investment" min="0" />
+              </div>
+
+              <label class="ft-label">Physical Gold Amount</label>
+              <div class="input-row">
+                <span class="input-prefix">₹</span>
+                <input type="number" id="gold-physical" class="ft-input" placeholder="Physical gold investment" min="0" />
+              </div>
+            </div>
+
+            <div id="bank-invest-wrap" class="hidden">
+              <label class="ft-label" id="bank-amount-label">Principal Amount</label>
+              <div class="input-row">
+                <span class="input-prefix">₹</span>
+                <input type="number" id="bank-principal" class="ft-input" placeholder="Principal amount" min="0" />
+              </div>
+
+              <label class="ft-label">Interest %</label>
+              <div class="input-row">
+                <input type="number" id="bank-interest" class="ft-input" placeholder="e.g. 7.5" min="0" step="0.1" />
+                <span class="input-suffix">%</span>
+              </div>
+
+              <label class="ft-label">Duration</label>
+              <div class="input-row">
+                <input type="number" id="bank-duration" class="ft-input" placeholder="Duration in months" min="1" />
+                <span class="input-suffix">months</span>
+              </div>
+
+              <label class="ft-label">Return Amount</label>
+              <div class="input-row">
+                <span class="input-prefix">₹</span>
+                <input type="number" id="bank-return" class="ft-input" placeholder="Maturity / return amount" min="0" />
+              </div>
+
+              <p class="ft-hint" id="bank-hint">
+                FD total investment = principal amount.
+              </p>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn-secondary" id="btn-cancel-investment">Cancel</button>
+              <button class="btn-primary" id="btn-save-investment">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="investments-list" class="items-list"></div>
+
+        <p class="feedback-line">
+          Feedback:
+          <a href="mailto:bhuvanesh07web@gmail.com">bhuvanesh07web@gmail.com</a>
+        </p>
+
+      </main>
+    </div>
+
+    <nav class="bottomnav">
+      <button class="bnav-btn active" data-pg="1" id="bnav-1">
+        <span class="bnav-icon">🏠</span>
+        <span class="bnav-label">Dashboard</span>
+      </button>
+
+      <div class="page-dots">
+        <span class="dot active" id="dot-1"></span>
+        <span class="dot" id="dot-2"></span>
+      </div>
+
+      <button class="bnav-btn" data-pg="2" id="bnav-2">
+        <span class="bnav-icon">📈</span>
+        <span class="bnav-label">Investments</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <script src="{% static 'script.js' %}"></script>
+</body>
+</html>
