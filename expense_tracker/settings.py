@@ -20,6 +20,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -45,8 +47,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "expense_tracker.wsgi.app"
-
+WSGI_APPLICATION = "expense_tracker.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
