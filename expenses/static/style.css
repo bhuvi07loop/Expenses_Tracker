@@ -1283,3 +1283,38 @@ html[data-theme="dark"] .modal-close-btn {
     min-height: 32px !important;
   }
 }
+.theme-toggle,
+#themeToggle,
+#theme-toggle {
+  position: fixed !important;
+  top: 18px;
+  left: 18px;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+@media (max-width: 600px) {
+  .theme-toggle,
+  #themeToggle,
+  #theme-toggle {
+    top: 12px;
+    left: 12px;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+  }
+
+  .app,
+  .container,
+  .dashboard {
+    padding-top: 60px;
+  }
+}
