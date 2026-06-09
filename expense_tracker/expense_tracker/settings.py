@@ -16,10 +16,10 @@ ALLOWED_HOSTS = [
     "localhost",
     ".vercel.app",
 ]
+
 CSRF_TRUSTED_ORIGINS = [
     "https://*.vercel.app",
 ]
-
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -133,8 +133,10 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
 SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {
     'prompt': 'select_account'
 }
+
 SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 SOCIAL_AUTH_LOGIN_ERROR_URL = "/"
+
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
