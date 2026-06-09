@@ -1431,3 +1431,160 @@ html[data-theme="dark"] .modal-close-btn {
     padding-top: 72px;
   }
 }
+/* ===============================
+   FINAL MOBILE + THEME FIX
+   Keep this block at the VERY BOTTOM.
+   =============================== */
+
+/* Only the login theme button should float on login page */
+.theme-float.theme-toggle {
+  position: fixed !important;
+  top: 18px !important;
+  right: 18px !important;
+  left: auto !important;
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--line) !important;
+  background: var(--card-strong) !important;
+  color: var(--text) !important;
+  box-shadow: var(--shadow-soft) !important;
+  display: grid !important;
+  place-items: center !important;
+  z-index: 9999 !important;
+}
+
+/* App navbar theme button must stay inside navbar, not fixed */
+.nav-icon-btn.theme-toggle {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 16px !important;
+  display: grid !important;
+  place-items: center !important;
+  z-index: auto !important;
+}
+
+/* Login page card alignment */
+.login-shell {
+  width: min(620px, 100%) !important;
+  margin: 0 auto !important;
+}
+
+/* Income / Expenses / Invest boxes */
+.mini-cards {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  margin: 18px auto 20px !important;
+}
+
+.mini-card {
+  min-height: 92px !important;
+  padding: 18px 12px !important;
+  border-radius: 24px !important;
+  background: var(--card-strong) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: var(--shadow-soft) !important;
+  backdrop-filter: blur(18px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.mini-card h3 {
+  margin: 0 !important;
+  font-size: 20px !important;
+  line-height: 1.1 !important;
+  font-weight: 950 !important;
+  color: var(--text) !important;
+}
+
+.mini-card p {
+  margin: 7px 0 0 !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+  color: var(--muted) !important;
+}
+
+/* LinkedIn footer */
+.footer-linkedin {
+  width: min(620px, calc(100% - 36px)) !important;
+  margin: 18px auto 92px !important;
+  text-align: center !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.footer-linkedin a {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+  color: var(--primary) !important;
+  font-weight: 900 !important;
+  font-size: 14px !important;
+  background: var(--card-strong) !important;
+  border: 1px solid var(--line) !important;
+  padding: 12px 18px !important;
+  border-radius: 999px !important;
+  box-shadow: var(--shadow-soft) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+.footer-linkedin a:hover {
+  transform: translateY(-1px) !important;
+}
+
+/* Mobile polish */
+@media (max-width: 760px) {
+  .page {
+    align-items: flex-start !important;
+    padding: 70px 18px 24px !important;
+  }
+
+  .theme-float.theme-toggle {
+    top: 12px !important;
+    right: 14px !important;
+    left: auto !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 15px !important;
+  }
+
+  .brand-block {
+    gap: 12px !important;
+  }
+
+  .brand-title {
+    font-size: clamp(32px, 10vw, 44px) !important;
+  }
+
+  .mini-cards {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .mini-card {
+    min-height: 82px !important;
+    border-radius: 22px !important;
+  }
+
+  .mini-card h3 {
+    font-size: 22px !important;
+  }
+
+  .mini-card p {
+    font-size: 15px !important;
+  }
+
+  .footer-linkedin {
+    margin-bottom: 98px !important;
+  }
+}

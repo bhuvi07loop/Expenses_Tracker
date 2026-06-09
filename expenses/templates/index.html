@@ -15,13 +15,12 @@
 </head>
 
 <body
-  <button class="theme-toggle" type="button">🌙</button>
-
-  <!-- your full page content here -->
   data-django-auth="{% if user.is_authenticated %}true{% else %}false{% endif %}"
   data-django-email="{% if user.is_authenticated %}{% if user.email %}{{ user.email }}{% else %}{{ user.username }}{% endif %}{% endif %}"
 >
+  <button class="theme-toggle" type="button">🌙</button>
 
+  <!-- your full page content here -->
   <!-- LOGIN PAGE -->
   <div id="page-login" class="page active">
 
