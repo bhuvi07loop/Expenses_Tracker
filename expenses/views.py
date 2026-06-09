@@ -1,5 +1,5 @@
 import json
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -7,6 +7,8 @@ from django.views.decorators.csrf import csrf_exempt
 def home(request):
     return render(request, "index.html")
 
+def logout_user(request):
+    return redirect("home")
 
 def get_json_data(request):
     try:
