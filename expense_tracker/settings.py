@@ -78,3 +78,4 @@ LOGOUT_REDIRECT_URL = "/"
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("GOOGLE_CLIENT_ID")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ["email", "profile"]
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
