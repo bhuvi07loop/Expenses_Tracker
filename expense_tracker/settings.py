@@ -103,9 +103,6 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("GOOGLE_CLIENT_ID")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ["email", "profile"]
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = (
-    "https://expenses-tracker-one-gray.vercel.app/auth/complete/google-oauth2/"
-)
 
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 
