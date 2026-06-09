@@ -1,16 +1,16 @@
 {
   "version": 2,
-  "buildCommand": "python manage.py collectstatic --noinput",
+  "buildCommand": "cd expense_tracker && python manage.py collectstatic --noinput",
   "builds": [
     {
-      "src": "expense_tracker/wsgi.py",
+      "src": "expense_tracker/expense_tracker/wsgi.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "expense_tracker/wsgi.py"
+      "dest": "expense_tracker/expense_tracker/wsgi.py"
     }
   ]
 }
