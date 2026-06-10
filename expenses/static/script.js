@@ -682,3 +682,54 @@ document.addEventListener("DOMContentLoaded", function () {
     renderSummary();
   }
 });
+// Logout fix: after /logout/ redirect, always show login card
+document.addEventListener("DOMContentLoaded", function () {
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get("logout") === "1") {
+    const loginPage = document.getElementById("page-login");
+    const appPage = document.getElementById("app");
+
+    if (appPage) {
+      appPage.classList.add("hidden");
+    }
+
+    if (loginPage) {
+      loginPage.classList.remove("hidden");
+      loginPage.classList.add("active");
+    }
+
+    document.body.setAttribute("data-django-auth", "false");
+
+    window.history.replaceState({}, document.title, "/");
+  }
+});
+
+
+// Delete confirmation for all delete/remove buttons
+document.addEventListener(
+  "click",
+  function (event) {
+    const deleteBtn = event.target.closest(
+      ".delete-btn, .btn-delete, .remove-btn, .btn-remove, [data-action='delete'], [data-delete]"
+    );
+
+    if (!deleteBtn) return;
+
+    if (deleteBtn.dataset.confirmed === "true") {
+      deleteBtn.dataset.confirmed = "";
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const ok = confirm("Are you sure you want to delete this?");
+
+    if (ok) {
+      deleteBtn.dataset.confirmed = "true";
+      deleteBtn.click();
+    }
+  },
+  true
+);
