@@ -10,6 +10,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 
+IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_URL"))
+
+
 # SECURITY
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-local-key")
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
@@ -79,11 +82,11 @@ if DATABASE_URL:
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,
+            ssl_require=DATABASE_URL.startswith(("postgres://", "postgresql://")),
         )
     }
 else:
-    if os.environ.get("VERCEL"):
+    if IS_VERCEL:
         raise ImproperlyConfigured("DATABASE_URL missing in Vercel Environment Variables")
 
     DATABASES = {
@@ -105,7 +108,14 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -126,28 +136,30 @@ LOGOUT_REDIRECT_URL = "/"
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ["email", "profile"]
+
 SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {
     "prompt": "select_account"
 }
 
-# Important:
-# Local DEBUG=True  -> callback uses http://127.0.0.1:8000
-# Vercel DEBUG=False -> callback uses https://your-vercel-domain
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = not DEBUG
+# Local = http callback
+# Vercel = https callback
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = IS_VERCEL
 
 
 # HTTPS / PROXY
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = IS_VERCEL
+
+if IS_VERCEL:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # SESSION / COOKIE
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
-SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = IS_VERCEL
 SESSION_COOKIE_SAMESITE = "Lax"
 
-CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = IS_VERCEL
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
