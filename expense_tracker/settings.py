@@ -179,3 +179,18 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.load_extra_data",
     "social_core.pipeline.user.user_details",
 )
+
+# FINAL GOOGLE REDIRECT FIX
+
+PRODUCTION_DOMAIN = "expenses-tracker-one-gray.vercel.app"
+
+if IS_VERCEL:
+    SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+    SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = (
+        f"https://{PRODUCTION_DOMAIN}/auth/complete/google-oauth2/"
+    )
+else:
+    SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
