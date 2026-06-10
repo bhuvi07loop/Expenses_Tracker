@@ -169,7 +169,7 @@
 
       <div class="nav-actions">
         <span class="logged-email" id="logged-email"></span>
-        
+
         <button class="btn-reset" id="btn-open-reset" type="button">Reset</button>
 
         <button class="btn-top-page" id="btn-top-page" type="button">Page 2 →</button>
@@ -419,6 +419,18 @@
 
   </div>
 
-  <script src="{% static 'script.js' %}?v=32" defer></script>
+  <script>
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("logged_out") === "1" || params.get("logout") === "1") {
+      localStorage.removeItem("wealth_logged_in");
+      localStorage.removeItem("wealth_current_email");
+      sessionStorage.clear();
+    }
+  })();
+</script>
+
+<script src="{% static 'script.js' %}?v=40" defer></script>
 </body>
 </html>

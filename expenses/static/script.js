@@ -212,9 +212,18 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Logout link
+  // Logout link
   if ($("btn-logout-link")) {
-    $("btn-logout-link").addEventListener("click", () => {
+    $("btn-logout-link").addEventListener("click", function (e) {
+      e.preventDefault();
+
       clearLoginSessionOnly();
+
+      localStorage.removeItem("wealth_logged_in");
+      localStorage.removeItem("wealth_current_email");
+      sessionStorage.clear();
+
+      window.location.href = "/logout/";
     });
   }
 
