@@ -3662,3 +3662,319 @@ html[data-theme="dark"] body {
   }
 }
 
+/* ===== FINAL FIX: CLEAN EXPENSE LAYOUT + ONE EXPENSE DONUT ===== */
+
+.app-page {
+  display: none;
+}
+
+.app-page.active {
+  display: block;
+}
+
+.expense-analytics-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.75fr) !important;
+  gap: 18px !important;
+  align-items: start !important;
+  margin-top: 18px !important;
+}
+
+.expense-left-panel,
+.analytics-right-panel {
+  min-width: 0 !important;
+}
+
+.expense-left-panel {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.analytics-right-panel {
+  display: grid !important;
+  align-content: start !important;
+}
+
+.expense-list-box {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.vertical-expenses {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.vertical-expenses .item-card {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 15px 16px !important;
+  border-radius: 20px !important;
+  background: var(--card-strong) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.vertical-expenses .item-title {
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  color: var(--text) !important;
+}
+
+.vertical-expenses .item-meta {
+  font-size: 11.5px !important;
+  color: var(--muted) !important;
+  font-weight: 800 !important;
+  margin-top: 3px !important;
+}
+
+.vertical-expenses .item-amount {
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  color: var(--text) !important;
+  text-align: right !important;
+}
+
+.vertical-expenses .item-actions {
+  display: flex !important;
+  gap: 8px !important;
+  justify-content: flex-end !important;
+  margin-top: 8px !important;
+}
+
+.view-all-wrap {
+  display: flex !important;
+  justify-content: flex-start !important;
+}
+
+#btn-toggle-expenses {
+  border-radius: 999px !important;
+  padding: 8px 14px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+/* Expense donut card */
+.expense-split-card {
+  background: var(--card-strong) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 24px !important;
+  padding: 16px !important;
+  box-shadow: var(--shadow-soft) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+.donut-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 14px !important;
+}
+
+.donut-head h3 {
+  margin: 0 !important;
+  font-size: 17px !important;
+  font-weight: 950 !important;
+  color: var(--text) !important;
+}
+
+.chart-kicker {
+  margin: 0 0 3px !important;
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+}
+
+.donut-head i {
+  width: 38px !important;
+  height: 38px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 14px !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #4f46e5, #06b6d4) !important;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.14) !important;
+}
+
+.expense-donut-wrap {
+  display: grid !important;
+  gap: 14px !important;
+  justify-items: center !important;
+}
+
+.expense-donut {
+  --expense-donut-bg: conic-gradient(#334155 0deg 360deg);
+  width: 190px !important;
+  height: 190px !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  background: var(--expense-donut-bg) !important;
+  position: relative !important;
+  box-shadow: inset 0 0 0 1px var(--line) !important;
+}
+
+.expense-donut::before {
+  content: "";
+  position: absolute;
+  inset: 24px;
+  border-radius: 50%;
+  background: var(--card-strong);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.expense-donut-center {
+  position: relative !important;
+  z-index: 1 !important;
+  text-align: center !important;
+  display: grid !important;
+  gap: 3px !important;
+}
+
+.expense-donut-center span {
+  color: var(--text) !important;
+  font-size: 27px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.8px !important;
+}
+
+.expense-donut-center small {
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+}
+
+.expense-donut-legend {
+  width: 100% !important;
+  display: grid !important;
+  gap: 9px !important;
+}
+
+.expense-donut-legend-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 11px !important;
+  padding: 9px 11px !important;
+  border-radius: 15px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid var(--line) !important;
+}
+
+.expense-legend-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  min-width: 0 !important;
+}
+
+.expense-color-dot {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 999px !important;
+  flex: 0 0 auto !important;
+}
+
+.expense-legend-left strong {
+  display: block !important;
+  color: var(--text) !important;
+  font-size: 12.5px !important;
+  font-weight: 950 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.expense-legend-left span {
+  display: block !important;
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  margin-top: 2px !important;
+}
+
+.expense-donut-legend-row b {
+  color: var(--text) !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+}
+
+.empty-mini {
+  color: var(--muted) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  text-align: center !important;
+  padding: 10px !important;
+}
+
+/* Remove old broken chart parts */
+.combined-circle-card,
+.donut-card,
+.circle-metric-grid,
+.finance-donut,
+.finance-donut-xl,
+.savings-bar-section,
+.btn-top-page,
+.dash-avatar {
+  display: none !important;
+}
+
+/* Mobile */
+@media (max-width: 980px) {
+  .expense-analytics-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .analytics-right-panel {
+    width: 100% !important;
+  }
+
+  .expense-donut {
+    width: 175px !important;
+    height: 175px !important;
+  }
+
+  .expense-donut::before {
+    inset: 22px !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .vertical-expenses .item-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .vertical-expenses .item-amount {
+    text-align: left !important;
+  }
+
+  .vertical-expenses .item-actions {
+    justify-content: flex-start !important;
+  }
+
+  .expense-donut {
+    width: 155px !important;
+    height: 155px !important;
+  }
+
+  .expense-donut::before {
+    inset: 19px !important;
+  }
+
+  .expense-donut-center span {
+    font-size: 22px !important;
+  }
+
+  .expense-donut-legend-row {
+    padding: 8px 10px !important;
+  }
+}
