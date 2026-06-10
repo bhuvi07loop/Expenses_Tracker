@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let activeCat = "all";
   let pendingConfirmAction = null;
   let maturityManuallyEdited = false;
+  let cloudSaveTimer = null;
 
   function clearLoginSessionOnly() {
     sessionStorage.clear();
@@ -84,6 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function saveUserData() {
     localStorage.setItem(userKey("expenses"), JSON.stringify(expenses));
     localStorage.setItem(userKey("investments"), JSON.stringify(investments));
+    saveToDatabaseDebounced();
   }
 
   function getIncome() {
@@ -92,6 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function setIncome(value) {
     localStorage.setItem(userKey("income"), Number(value || 0));
+    saveToDatabaseDebounced();
   }
 
   function hasSavedName() {
@@ -111,6 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function setName(name) {
     localStorage.setItem(userKey("name"), name);
+    saveToDatabaseDebounced();
   }
 
   function getSavedPage() {
@@ -119,7 +123,105 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function saveActivePage(num) {
     localStorage.setItem(userKey("active_page"), String(num));
+    saveToDatabaseDebounced();
   }
+
+  function getCookie(name) {
+    const cookies = document.cookie ? document.cookie.split(";") : [];
+
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+
+      if (cookie.startsWith(name + "=")) {
+        return decodeURIComponent(cookie.substring(name.length + 1));
+      }
+    }
+
+    return "";
+  }
+
+  function getSnapshotForDatabase() {
+    return {
+      name: getName(),
+      income: getIncome(),
+      expenses: expenses,
+      investments: investments,
+      active_page: getSavedPage(),
+    };
+  }
+
+  async function loadFromDatabase() {
+    if (!djangoAuth || !djangoEmail) return;
+
+    const localHadData =
+      expenses.length > 0 ||
+      investments.length > 0 ||
+      getIncome() > 0 ||
+      hasSavedName();
+
+    try {
+      const response = await fetch("/api/finance/", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      currentEmail = cleanEmail(data.email || currentEmail);
+
+      // First time: if database is empty but this device already has values,
+      // upload this device values to database.
+      if (!data.has_data && localHadData) {
+        await saveToDatabaseNow();
+        return;
+      }
+
+      expenses = Array.isArray(data.expenses) ? data.expenses : [];
+      investments = Array.isArray(data.investments) ? data.investments : [];
+
+      localStorage.setItem(userKey("expenses"), JSON.stringify(expenses));
+      localStorage.setItem(userKey("investments"), JSON.stringify(investments));
+      localStorage.setItem(userKey("income"), Number(data.income || 0));
+      localStorage.setItem(userKey("active_page"), String(data.active_page || 1));
+
+      if (data.name) {
+        localStorage.setItem(userKey("name"), data.name);
+      }
+    } catch (error) {
+      console.log("Cloud load failed:", error);
+    }
+  }
+
+  async function saveToDatabaseNow() {
+    if (!djangoAuth || !currentEmail) return;
+
+    try {
+      await fetch("/api/finance/save/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify(getSnapshotForDatabase()),
+      });
+    } catch (error) {
+      console.log("Cloud save failed:", error);
+    }
+  }
+
+    function saveToDatabaseDebounced() {
+      if (!djangoAuth || !currentEmail) return;
+
+      clearTimeout(cloudSaveTimer);
+
+      cloudSaveTimer = setTimeout(() => {
+        saveToDatabaseNow();
+      }, 500);
+    }
 
   function resetCurrentUserValues() {
     localStorage.removeItem(userKey("income"));
@@ -210,10 +312,10 @@ document.addEventListener("DOMContentLoaded", function () {
     body.dataset.djangoEmail = "";
   }
 
-  function showApp() {
+  async function showApp() {
     if (!login || !app) return;
 
-    loadUserData();
+    await loadUserData();
 
     login.classList.add("hidden");
     login.classList.remove("active");
