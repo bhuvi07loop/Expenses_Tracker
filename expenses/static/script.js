@@ -1,3 +1,45 @@
+// HARD LOGOUT FIX
+(function () {
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get("logout") === "1") {
+    sessionStorage.clear();
+
+    // Clear only login/session-related localStorage keys
+    Object.keys(localStorage).forEach((key) => {
+      const k = key.toLowerCase();
+
+      if (
+        k.includes("auth") ||
+        k.includes("login") ||
+        k.includes("logged") ||
+        k.includes("current") ||
+        k.includes("session") ||
+        k.includes("email")
+      ) {
+        localStorage.removeItem(key);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const loginPage = document.getElementById("page-login");
+      const appPage = document.getElementById("app");
+
+      if (appPage) appPage.classList.add("hidden");
+
+      if (loginPage) {
+        loginPage.classList.remove("hidden");
+        loginPage.classList.add("active");
+      }
+
+      document.body.setAttribute("data-django-auth", "false");
+      document.body.setAttribute("data-django-email", "");
+
+      window.history.replaceState({}, document.title, "/");
+    });
+  }
+})();
+
 document.addEventListener("DOMContentLoaded", function () {
   const root = document.documentElement;
   const body = document.body;
@@ -707,6 +749,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 // Delete confirmation for all delete/remove buttons
+document.addEventListener(
+  "click",
+  function (event) {
+    const deleteBtn = event.target.closest(
+      ".delete-btn, .btn-delete, .remove-btn, .btn-remove, [data-action='delete'], [data-delete]"
+    );
+
+    if (!deleteBtn) return;
+
+    if (deleteBtn.dataset.confirmed === "true") {
+      deleteBtn.dataset.confirmed = "";
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const ok = confirm("Are you sure you want to delete this?");
+
+    if (ok) {
+      deleteBtn.dataset.confirmed = "true";
+      deleteBtn.click();
+    }
+  },
+  true
+);
 document.addEventListener(
   "click",
   function (event) {

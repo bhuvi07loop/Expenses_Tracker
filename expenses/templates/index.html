@@ -23,7 +23,7 @@
 >
 
   <!-- LOGIN PAGE -->
-  <div id="page-login" class="page active">
+  <div id="page-login" class="page {% if user.is_authenticated %}hidden{% else %}active{% endif %}">
 
     <button class="theme-float theme-toggle" id="theme-toggle-login" title="Toggle theme" type="button">
       <span class="icon-sun">☀️</span>
@@ -154,7 +154,7 @@
   </div>
 
   <!-- MAIN APP -->
-  <div id="app" class="hidden">
+  <div id="app" class="{% if user.is_authenticated %}{% else %}hidden{% endif %}">
 
     <nav class="topnav">
       <button class="nav-icon-btn theme-toggle" id="theme-toggle" title="Toggle theme" type="button">

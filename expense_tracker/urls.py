@@ -15,10 +15,7 @@ def logout_view(request):
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-
     path("auth/", include("social_django.urls", namespace="social")),
-
     path("logout/", logout_view, name="logout"),
-
     path("", include("expenses.urls")),
 ]
