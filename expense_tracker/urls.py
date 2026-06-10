@@ -19,3 +19,10 @@ urlpatterns = [
     path("logout/", logout_view, name="logout"),
     path("", include("expenses.urls")),
 ]
+def logout_view(request):
+    logout(request)
+
+    response = redirect("/?logged_out=1")
+    response.delete_cookie("sessionid", path="/")
+    response.delete_cookie("csrftoken", path="/")
+    return response

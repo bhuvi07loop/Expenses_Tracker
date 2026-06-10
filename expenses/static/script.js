@@ -1,42 +1,18 @@
-// HARD LOGOUT FIX
+// script.js
+
 (function () {
   const params = new URLSearchParams(window.location.search);
+  const forcedLogout =
+    params.get("logged_out") === "1" || params.get("logout") === "1";
 
-  if (params.get("logout") === "1") {
+  window.__WEALTH_FORCED_LOGOUT__ = forcedLogout;
+
+  if (forcedLogout) {
     sessionStorage.clear();
 
-    // Clear only login/session-related localStorage keys
-    Object.keys(localStorage).forEach((key) => {
-      const k = key.toLowerCase();
-
-      if (
-        k.includes("auth") ||
-        k.includes("login") ||
-        k.includes("logged") ||
-        k.includes("current") ||
-        k.includes("session") ||
-        k.includes("email")
-      ) {
-        localStorage.removeItem(key);
-      }
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-      const loginPage = document.getElementById("page-login");
-      const appPage = document.getElementById("app");
-
-      if (appPage) appPage.classList.add("hidden");
-
-      if (loginPage) {
-        loginPage.classList.remove("hidden");
-        loginPage.classList.add("active");
-      }
-
-      document.body.setAttribute("data-django-auth", "false");
-      document.body.setAttribute("data-django-email", "");
-
-      window.history.replaceState({}, document.title, "/");
-    });
+    // Clear only login session keys. Do NOT clear saved expense/investment values.
+    localStorage.removeItem("wealth_logged_in");
+    localStorage.removeItem("wealth_current_email");
   }
 })();
 
@@ -47,11 +23,19 @@ document.addEventListener("DOMContentLoaded", function () {
   const $ = (id) => document.getElementById(id);
   const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
 
-
+  function esc(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
 
   const login = $("page-login");
   const app = $("app");
 
+  const forcedLogout = window.__WEALTH_FORCED_LOGOUT__ === true;
   const djangoAuth = body.dataset.djangoAuth === "true";
   const djangoEmail = String(body.dataset.djangoEmail || "").trim().toLowerCase();
 
@@ -61,6 +45,12 @@ document.addEventListener("DOMContentLoaded", function () {
   let editingExpense = null;
   let editingInvestment = null;
   let activeCat = "all";
+
+  function clearLoginSessionOnly() {
+    sessionStorage.clear();
+    localStorage.removeItem("wealth_logged_in");
+    localStorage.removeItem("wealth_current_email");
+  }
 
   function cleanEmail(email) {
     return String(email || "").trim().toLowerCase();
@@ -134,30 +124,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  setTheme(localStorage.getItem("wealth_theme") || "light");
-
-  document.querySelectorAll(".theme-toggle").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const current = root.getAttribute("data-theme") || "light";
-      setTheme(current === "dark" ? "light" : "dark");
-    });
-  });
-
-  if ($("btn-see-more")) {
-    $("btn-see-more").addEventListener("click", () => {
-      $("more-info").classList.toggle("hidden");
-      $("btn-see-more").textContent = $("more-info").classList.contains("hidden")
-        ? "See more"
-        : "See less";
-    });
-  }
-
   function showLogin() {
     if (!login || !app) return;
 
     login.classList.remove("hidden");
     login.classList.add("active");
+
     app.classList.add("hidden");
+    app.classList.remove("active");
+
+    body.dataset.djangoAuth = "false";
+    body.dataset.djangoEmail = "";
   }
 
   function showApp() {
@@ -167,7 +144,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     login.classList.add("hidden");
     login.classList.remove("active");
+
     app.classList.remove("hidden");
+    app.classList.add("active");
 
     updateUserUI();
     renderAll();
@@ -187,22 +166,59 @@ document.addEventListener("DOMContentLoaded", function () {
     if ($("logged-email")) $("logged-email").textContent = currentEmail;
   }
 
-  if (djangoAuth && djangoEmail) {
+  // Theme
+  setTheme(localStorage.getItem("wealth_theme") || "light");
+
+  document.querySelectorAll(".theme-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const current = root.getAttribute("data-theme") || "light";
+      setTheme(current === "dark" ? "light" : "dark");
+    });
+  });
+
+  // See more button
+  if ($("btn-see-more")) {
+    $("btn-see-more").addEventListener("click", () => {
+      $("more-info").classList.toggle("hidden");
+      $("btn-see-more").textContent = $("more-info").classList.contains("hidden")
+        ? "See more"
+        : "See less";
+    });
+  }
+
+  // Login / Logout state
+  if (forcedLogout) {
+    clearLoginSessionOnly();
+    currentEmail = "";
+    showLogin();
+    window.history.replaceState({}, document.title, "/");
+  } else if (djangoAuth && djangoEmail) {
+    currentEmail = djangoEmail;
     localStorage.setItem("wealth_logged_in", "true");
     localStorage.setItem("wealth_current_email", djangoEmail);
-    currentEmail = djangoEmail;
-  } else {
-    currentEmail = cleanEmail(localStorage.getItem("wealth_current_email"));
-  }
-
-  const loggedIn = djangoAuth || localStorage.getItem("wealth_logged_in") === "true";
-
-  if (loggedIn && currentEmail) {
     showApp();
   } else {
-    showLogin();
+    const localEmail = cleanEmail(localStorage.getItem("wealth_current_email"));
+    const localLoggedIn = localStorage.getItem("wealth_logged_in") === "true";
+
+    if (localLoggedIn && localEmail) {
+      currentEmail = localEmail;
+      showApp();
+    } else {
+      clearLoginSessionOnly();
+      currentEmail = "";
+      showLogin();
+    }
   }
 
+  // Logout link
+  if ($("btn-logout-link")) {
+    $("btn-logout-link").addEventListener("click", () => {
+      clearLoginSessionOnly();
+    });
+  }
+
+  // Email login
   if ($("btn-email-login")) {
     $("btn-email-login").addEventListener("click", () => {
       const email = cleanEmail($("input-email-login").value);
@@ -222,19 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  if ($("btn-logout")) {
-    $("btn-logout").addEventListener("click", (e) => {
-      localStorage.removeItem("wealth_logged_in");
-      localStorage.removeItem("wealth_current_email");
-
-      if (!djangoAuth) {
-        e.preventDefault();
-        currentEmail = "";
-        showLogin();
-      }
-    });
-  }
-
+  // Name modal
   if ($("btn-edit-name")) {
     $("btn-edit-name").addEventListener("click", () => {
       $("input-name").value = getName();
@@ -271,6 +275,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Reset modal
   if ($("btn-open-reset")) {
     $("btn-open-reset").addEventListener("click", () => {
       $("reset-robot-check").checked = false;
@@ -307,6 +312,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Page switch
   function setPage(num) {
     const isPage2 = num === 2;
 
@@ -334,6 +340,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if ($("bnav-1")) $("bnav-1").addEventListener("click", () => setPage(1));
   if ($("bnav-2")) $("bnav-2").addEventListener("click", () => setPage(2));
 
+  // Income
   if ($("btn-edit-income")) {
     $("btn-edit-income").addEventListener("click", () => {
       $("input-income").value = getIncome();
@@ -355,6 +362,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Expenses
   if ($("btn-add-expense")) {
     $("btn-add-expense").addEventListener("click", () => {
       editingExpense = null;
@@ -415,7 +423,7 @@ document.addEventListener("DOMContentLoaded", function () {
       div.className = "item-card";
       div.innerHTML = `
         <div>
-          <div class="item-title">${item.title}</div>
+          <div class="item-title">${esc(item.title)}</div>
           <div class="item-meta">Monthly expense</div>
         </div>
         <div>
@@ -443,6 +451,10 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll("[data-del-exp]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const index = Number(btn.dataset.delExp);
+
+        const ok = confirm("Are you sure you want to delete this expense?");
+        if (!ok) return;
+
         expenses.splice(index, 1);
         saveUserData();
         renderAll();
@@ -450,6 +462,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Investments
   function updateInvestmentFields() {
     if (!$("inv-category")) return;
 
@@ -528,7 +541,7 @@ document.addEventListener("DOMContentLoaded", function () {
       let item = {
         title,
         category,
-        amount: 0
+        amount: 0,
       };
 
       if (category === "Gold") {
@@ -651,8 +664,8 @@ document.addEventListener("DOMContentLoaded", function () {
       div.className = "item-card";
       div.innerHTML = `
         <div>
-          <div class="item-title">${item.title}</div>
-          <div class="item-meta">${investmentMeta(item)}</div>
+          <div class="item-title">${esc(item.title)}</div>
+          <div class="item-meta">${esc(investmentMeta(item))}</div>
         </div>
         <div>
           <div class="item-amount">${money(item.amount)}</div>
@@ -695,6 +708,10 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll("[data-del-inv]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const index = Number(btn.dataset.delInv);
+
+        const ok = confirm("Are you sure you want to delete this investment?");
+        if (!ok) return;
+
         investments.splice(index, 1);
         saveUserData();
         renderAll();
@@ -724,80 +741,3 @@ document.addEventListener("DOMContentLoaded", function () {
     renderSummary();
   }
 });
-// Logout fix: after /logout/ redirect, always show login card
-document.addEventListener("DOMContentLoaded", function () {
-  const params = new URLSearchParams(window.location.search);
-
-  if (params.get("logout") === "1") {
-    const loginPage = document.getElementById("page-login");
-    const appPage = document.getElementById("app");
-
-    if (appPage) {
-      appPage.classList.add("hidden");
-    }
-
-    if (loginPage) {
-      loginPage.classList.remove("hidden");
-      loginPage.classList.add("active");
-    }
-
-    document.body.setAttribute("data-django-auth", "false");
-
-    window.history.replaceState({}, document.title, "/");
-  }
-});
-
-
-// Delete confirmation for all delete/remove buttons
-document.addEventListener(
-  "click",
-  function (event) {
-    const deleteBtn = event.target.closest(
-      ".delete-btn, .btn-delete, .remove-btn, .btn-remove, [data-action='delete'], [data-delete]"
-    );
-
-    if (!deleteBtn) return;
-
-    if (deleteBtn.dataset.confirmed === "true") {
-      deleteBtn.dataset.confirmed = "";
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const ok = confirm("Are you sure you want to delete this?");
-
-    if (ok) {
-      deleteBtn.dataset.confirmed = "true";
-      deleteBtn.click();
-    }
-  },
-  true
-);
-document.addEventListener(
-  "click",
-  function (event) {
-    const deleteBtn = event.target.closest(
-      ".delete-btn, .btn-delete, .remove-btn, .btn-remove, [data-action='delete'], [data-delete]"
-    );
-
-    if (!deleteBtn) return;
-
-    if (deleteBtn.dataset.confirmed === "true") {
-      deleteBtn.dataset.confirmed = "";
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const ok = confirm("Are you sure you want to delete this?");
-
-    if (ok) {
-      deleteBtn.dataset.confirmed = "true";
-      deleteBtn.click();
-    }
-  },
-  true
-);
