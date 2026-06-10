@@ -1,28 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth import logout
-from django.shortcuts import redirect
-
-
-def logout_view(request):
-    logout(request)
-
-    response = redirect("/?logout=1")
-    response.delete_cookie("sessionid", path="/")
-    response.delete_cookie("csrftoken", path="/")
-    return response
-
+from expenses.views import index, logout_user
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", index, name="home"),
     path("auth/", include("social_django.urls", namespace="social")),
-    path("logout/", logout_view, name="logout"),
-    path("", include("expenses.urls")),
+    path("logout/", logout_user, name="logout"),
 ]
-def logout_view(request):
-    logout(request)
-
-    response = redirect("/?logged_out=1")
-    response.delete_cookie("sessionid", path="/")
-    response.delete_cookie("csrftoken", path="/")
-    return response

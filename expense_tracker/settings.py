@@ -127,22 +127,39 @@ AUTHENTICATION_BACKENDS = (
 )
 
 LOGIN_URL = "/auth/login/google-oauth2/"
-LOGIN_REDIRECT_URL = "/dashboard/"
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 
 # GOOGLE OAUTH
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
+# This supports BOTH names:
+# 1. SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
+# 2. GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_ID = (
+    os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
+    or os.environ.get("GOOGLE_CLIENT_ID")
+)
+
+GOOGLE_CLIENT_SECRET = (
+    os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
+    or os.environ.get("GOOGLE_CLIENT_SECRET")
+)
+
+if not GOOGLE_CLIENT_ID:
+    raise ImproperlyConfigured("Google Client ID missing. Add SOCIAL_AUTH_GOOGLE_OAUTH2_KEY in .env or Vercel.")
+
+if not GOOGLE_CLIENT_SECRET:
+    raise ImproperlyConfigured("Google Client Secret missing. Add SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET in .env or Vercel.")
+
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOOGLE_CLIENT_ID
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = GOOGLE_CLIENT_SECRET
+
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ["email", "profile"]
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {
     "prompt": "select_account"
 }
-
-# Local = http callback
-# Vercel = https callback
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = IS_VERCEL
 
 
 # HTTPS / PROXY
@@ -152,6 +169,21 @@ if IS_VERCEL:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
+# GOOGLE REDIRECT FIX
+PRODUCTION_DOMAIN = os.environ.get(
+    "PRODUCTION_DOMAIN",
+    "expenses-tracker-one-gray.vercel.app"
+)
+
+if IS_VERCEL:
+    SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+    SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = (
+        f"https://{PRODUCTION_DOMAIN}/auth/complete/google-oauth2/"
+    )
+else:
+    SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+
+
 # SESSION / COOKIE
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
@@ -159,6 +191,7 @@ SESSION_COOKIE_SECURE = IS_VERCEL
 SESSION_COOKIE_SAMESITE = "Lax"
 
 CSRF_COOKIE_SECURE = IS_VERCEL
+
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
@@ -179,18 +212,3 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.load_extra_data",
     "social_core.pipeline.user.user_details",
 )
-
-# FINAL GOOGLE REDIRECT FIX
-
-PRODUCTION_DOMAIN = "expenses-tracker-one-gray.vercel.app"
-
-if IS_VERCEL:
-    SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
-    USE_X_FORWARDED_HOST = True
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
-    SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = (
-        f"https://{PRODUCTION_DOMAIN}/auth/complete/google-oauth2/"
-    )
-else:
-    SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
