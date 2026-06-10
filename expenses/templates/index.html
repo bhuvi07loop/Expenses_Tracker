@@ -14,7 +14,7 @@
     rel="stylesheet"
   />
 
-  <link rel="stylesheet" href="{% static 'style.css' %}?v=33">
+  <link rel="stylesheet" href="{% static 'style.css' %}?v=60">
 </head>
 
 <body
@@ -279,7 +279,7 @@
           </div>
 
           <div class="inv-total-badge">
-            <p class="sc-label">Total Invested</p>
+          <p class="sc-label">Total Maturity Value</p>
             <h2 class="sc-value" id="inv-total">₹0</h2>
           </div>
         </header>
@@ -361,9 +361,25 @@
               </div>
 
               <label class="ft-label">Duration</label>
-              <div class="input-row">
-                <input type="number" id="bank-duration" class="ft-input" placeholder="Duration in months" min="1" />
-                <span class="input-suffix">months</span>
+
+              <div class="duration-grid">
+                <div class="input-row">
+                  <input type="number" id="bank-years" class="ft-input" placeholder="Years" min="0" />
+                  <span class="input-suffix">years</span>
+                </div>
+
+                <div class="input-row">
+                  <input type="number" id="bank-duration" class="ft-input" placeholder="Months" min="0" />
+                  <span class="input-suffix">months</span>
+                </div>
+
+                <div class="input-row">
+                  <input type="number" id="bank-days" class="ft-input" placeholder="Days" min="0" />
+                  <span class="input-suffix">days</span>
+                </div>
+              </div>
+
+              <label class="ft-label">Maturity Return Amount</label>
               </div>
 
               <label class="ft-label">Return Amount</label>
@@ -431,6 +447,6 @@
   })();
 </script>
 
-<script src="{% static 'script.js' %}?v=40" defer></script>
+<script src="{% static 'script.js' %}?v=60" defer></script>
 </body>
 </html>

@@ -1445,3 +1445,305 @@ input[type="number"] {
   background: #dc2626;
   transform: translateY(-1px);
 }
+/* ===== COMPACT UI FIX BY BUVI ===== */
+
+/* Overall smaller comfortable size */
+body {
+  font-size: 14px !important;
+}
+
+.container {
+  max-width: 1080px !important;
+  padding: 18px 22px 90px !important;
+}
+
+/* Top nav smaller */
+.topnav {
+  min-height: 58px !important;
+  padding: 0 18px !important;
+}
+
+.nav-logo span {
+  font-size: 15px !important;
+}
+
+.nav-logo-icon,
+.nav-icon-btn {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 14px !important;
+}
+
+.nav-actions {
+  gap: 8px !important;
+}
+
+.logged-email {
+  font-size: 12px !important;
+  max-width: 170px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Logout button design */
+.logout-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 34px !important;
+  padding: 8px 15px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  border: none !important;
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.25) !important;
+  cursor: pointer !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.logout-btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 12px 24px rgba(220, 38, 38, 0.32) !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+}
+
+/* Reset and page buttons compact */
+.btn-reset,
+.btn-top-page,
+.btn-primary.small {
+  min-height: 34px !important;
+  padding: 8px 14px !important;
+  border-radius: 999px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+/* Reduce name size */
+.dash-header {
+  margin: 20px 0 16px !important;
+}
+
+.greeting-label {
+  font-size: 12px !important;
+  letter-spacing: 0.03em !important;
+}
+
+.greeting-name {
+  font-size: clamp(28px, 4vw, 46px) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.04em !important;
+}
+
+.greeting-name-row {
+  gap: 10px !important;
+}
+
+.small-round-btn {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 13px !important;
+}
+
+/* Avatar smaller */
+.dash-avatar {
+  width: 54px !important;
+  height: 54px !important;
+  font-size: 22px !important;
+  border-radius: 16px !important;
+}
+
+/* Cards smaller */
+.summary-grid {
+  gap: 14px !important;
+  margin-bottom: 22px !important;
+}
+
+.summary-card {
+  min-height: 112px !important;
+  padding: 18px !important;
+  border-radius: 22px !important;
+}
+
+.card-icon {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 16px !important;
+  border-radius: 12px !important;
+}
+
+.card-edit-btn {
+  width: 30px !important;
+  height: 30px !important;
+  font-size: 12px !important;
+}
+
+.sc-label {
+  font-size: 12px !important;
+}
+
+.sc-value {
+  font-size: 28px !important;
+  line-height: 1.05 !important;
+}
+
+/* Section title smaller */
+.section-header {
+  margin: 24px 0 14px !important;
+}
+
+.section-title {
+  font-size: 21px !important;
+}
+
+/* Empty box smaller */
+.empty-state {
+  min-height: 95px !important;
+  padding: 18px !important;
+  border-radius: 18px !important;
+}
+
+.empty-icon {
+  font-size: 26px !important;
+}
+
+.empty-state p {
+  font-size: 14px !important;
+}
+
+/* Expense / Investment items smaller */
+.item-card {
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+  margin-bottom: 10px !important;
+}
+
+.item-title {
+  font-size: 15px !important;
+}
+
+.item-meta {
+  font-size: 12px !important;
+}
+
+.item-amount {
+  font-size: 17px !important;
+}
+
+.mini-btn {
+  padding: 5px 9px !important;
+  font-size: 12px !important;
+  border-radius: 10px !important;
+}
+
+/* Forms compact */
+.edit-panel {
+  margin-bottom: 18px !important;
+}
+
+.panel-inner {
+  padding: 18px !important;
+  border-radius: 20px !important;
+}
+
+.panel-inner h3 {
+  font-size: 17px !important;
+}
+
+.ft-input,
+.ft-select {
+  min-height: 42px !important;
+  padding: 10px 13px !important;
+  font-size: 14px !important;
+  border-radius: 13px !important;
+}
+
+/* Savings bar compact */
+.savings-bar-section {
+  padding: 16px !important;
+  border-radius: 18px !important;
+  margin-top: 18px !important;
+}
+
+.sb-header {
+  font-size: 13px !important;
+}
+
+/* Bottom nav smaller */
+.bottomnav {
+  width: min(420px, calc(100% - 28px)) !important;
+  padding: 8px !important;
+  border-radius: 22px !important;
+}
+
+.bnav-btn {
+  padding: 8px 14px !important;
+  border-radius: 16px !important;
+}
+
+.bnav-label {
+  font-size: 12px !important;
+}
+
+/* Mobile fix */
+@media (max-width: 768px) {
+  .topnav {
+    padding: 0 10px !important;
+  }
+
+  .nav-logo span {
+    display: none !important;
+  }
+
+  .logged-email {
+    max-width: 95px !important;
+    font-size: 11px !important;
+  }
+
+  .btn-reset,
+  .btn-top-page,
+  .logout-btn {
+    padding: 7px 10px !important;
+    font-size: 12px !important;
+    min-height: 32px !important;
+  }
+
+  .container {
+    padding: 14px 14px 90px !important;
+  }
+
+  .greeting-name {
+    font-size: 30px !important;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .summary-card {
+    min-height: 95px !important;
+  }
+
+  .sc-value {
+    font-size: 25px !important;
+  }
+}
+.duration-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.duration-grid .input-row {
+  margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .duration-grid {
+    grid-template-columns: 1fr;
+  }
+}

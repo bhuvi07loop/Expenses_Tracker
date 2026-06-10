@@ -211,22 +211,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Logout link
-  // Logout link
-  if ($("btn-logout-link")) {
-    $("btn-logout-link").addEventListener("click", function (e) {
-      e.preventDefault();
+    // Logout link with confirmation
+    if ($("btn-logout-link")) {
+      $("btn-logout-link").addEventListener("click", function (e) {
+        e.preventDefault();
 
-      clearLoginSessionOnly();
+        const ok = confirm("Are you sure you want to logout?");
+        if (!ok) return;
 
-      localStorage.removeItem("wealth_logged_in");
-      localStorage.removeItem("wealth_current_email");
-      sessionStorage.clear();
-
-      window.location.href = "/logout/";
-    });
-  }
-
+        clearLoginSessionOnly();
+        window.location.href = "/logout/";
+      });
+    }
   // Email login
   if ($("btn-email-login")) {
     $("btn-email-login").addEventListener("click", () => {
@@ -526,7 +522,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       $("bank-principal").value = "";
       $("bank-interest").value = "";
+      $("bank-years").value = "";
       $("bank-duration").value = "";
+      $("bank-days").value = "";
       $("bank-return").value = "";
 
       updateInvestmentFields();
@@ -566,28 +564,38 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (category === "FD") {
         const principal = Number($("bank-principal").value || 0);
         const interest = Number($("bank-interest").value || 0);
+        const years = Number($("bank-years").value || 0);
         const duration = Number($("bank-duration").value || 0);
+        const days = Number($("bank-days").value || 0);
         const returnAmount = Number($("bank-return").value || 0);
 
-        if (principal <= 0 || duration <= 0) return;
+        if (principal <= 0 || years + duration + days <= 0) return;
 
         item.principal = principal;
         item.interest = interest;
+        item.years = years;
         item.duration = duration;
+        item.days = days;
         item.returnAmount = returnAmount;
         item.amount = principal;
       } else if (category === "RD") {
         const monthlyAmount = Number($("bank-principal").value || 0);
         const interest = Number($("bank-interest").value || 0);
+        const years = Number($("bank-years").value || 0);
         const duration = Number($("bank-duration").value || 0);
+        const days = Number($("bank-days").value || 0);
         const returnAmount = Number($("bank-return").value || 0);
-        const totalInvestment = monthlyAmount * duration;
 
-        if (monthlyAmount <= 0 || duration <= 0) return;
+        const totalMonths = years * 12 + duration + (days > 0 ? 1 : 0);
+        const totalInvestment = monthlyAmount * totalMonths;
+
+        if (monthlyAmount <= 0 || years + duration + days <= 0) return;
 
         item.monthlyAmount = monthlyAmount;
         item.interest = interest;
+        item.years = years;
         item.duration = duration;
+        item.days = days;
         item.returnAmount = returnAmount;
         item.amount = totalInvestment;
       } else {
@@ -625,17 +633,31 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+function durationText(item) {
+  const years = Number(item.years || 0);
+  const months = Number(item.duration || 0);
+  const days = Number(item.days || 0);
+
+  const parts = [];
+
+  if (years > 0) parts.push(`${years} year${years > 1 ? "s" : ""}`);
+  if (months > 0) parts.push(`${months} month${months > 1 ? "s" : ""}`);
+  if (days > 0) parts.push(`${days} day${days > 1 ? "s" : ""}`);
+
+  return parts.length ? parts.join(" ") : "0 months";
+}
+
   function investmentMeta(item) {
     if (item.category === "Gold") {
       return `Digital Gold ${money(item.digitalGold)} • Physical Gold ${money(item.physicalGold)}`;
     }
 
     if (item.category === "FD") {
-      return `Principal ${money(item.principal)} • ${item.interest || 0}% • ${item.duration} months • Return ${money(item.returnAmount)}`;
+      return `Principal ${money(item.principal)} • ${item.interest || 0}% • ${durationText(item)} • Maturity ${money(item.returnAmount)}`;
     }
 
     if (item.category === "RD") {
-      return `Monthly ${money(item.monthlyAmount)} × ${item.duration} months • Total ${money(item.amount)} • Return ${money(item.returnAmount)}`;
+      return `Monthly ${money(item.monthlyAmount)} • ${durationText(item)} • Invested ${money(item.amount)} • Maturity ${money(item.returnAmount)}`;
     }
 
     if (item.expectedReturn) {
@@ -706,7 +728,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         $("bank-principal").value = item.principal || item.monthlyAmount || "";
         $("bank-interest").value = item.interest || "";
+        $("bank-years").value = item.years || "";
         $("bank-duration").value = item.duration || "";
+        $("bank-days").value = item.days || "";
         $("bank-return").value = item.returnAmount || "";
 
         updateInvestmentFields();
@@ -718,12 +742,14 @@ document.addEventListener("DOMContentLoaded", function () {
       btn.addEventListener("click", () => {
         const index = Number(btn.dataset.delInv);
 
-        const ok = confirm("Are you sure you want to delete this investment?");
+        const itemName = expenses[index]?.title || "this expense";
+
+        const ok = confirm(`Delete "${itemName}" expense?\n\nThis action cannot be undone.`);
         if (!ok) return;
 
-        investments.splice(index, 1);
-        saveUserData();
-        renderAll();
+      expenses.splice(index, 1);
+      saveUserData();
+      renderAll();
       });
     });
   }
@@ -733,8 +759,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const totalExpenses = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
     const savings = income - totalExpenses;
     const pct = income > 0 ? Math.max(0, Math.round((savings / income) * 100)) : 0;
-    const totalInv = investments.reduce((sum, item) => sum + Number(item.amount), 0);
+    const totalInv = investments.reduce((sum, item) => {
+      if ((item.category === "FD" || item.category === "RD") && Number(item.returnAmount) > 0) {
+        return sum + Number(item.returnAmount);
+      }
 
+      return sum + Number(item.amount);
+    }, 0);
+    
     if ($("sum-income")) $("sum-income").textContent = money(income);
     if ($("sum-expenses")) $("sum-expenses").textContent = money(totalExpenses);
     if ($("sum-savings")) $("sum-savings").textContent = money(savings);
