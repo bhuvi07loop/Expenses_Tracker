@@ -2,9 +2,12 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 
 # SECURITY
@@ -12,8 +15,6 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-local-key")
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = ["*"]
-
-SITE_URL = "https://expenses-tracker-one-gray.vercel.app"
 
 
 # APPS
@@ -83,7 +84,7 @@ if DATABASE_URL:
     }
 else:
     if os.environ.get("VERCEL"):
-        raise ImproperlyConfigured("DATABASE_URL missing in Vercel")
+        raise ImproperlyConfigured("DATABASE_URL missing in Vercel Environment Variables")
 
     DATABASES = {
         "default": {
@@ -117,7 +118,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 LOGIN_URL = "/auth/login/google-oauth2/"
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/"
 
 
@@ -126,22 +127,30 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ["email", "profile"]
 
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+# Important:
+# Local DEBUG=True  -> callback uses http://127.0.0.1:8000
+# Vercel DEBUG=False -> callback uses https://your-vercel-domain
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = not DEBUG
+
+
+# HTTPS / PROXY
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # SESSION / COOKIE
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SAMESITE = "Lax"
 
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = not DEBUG
 CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
     "https://expenses-tracker-one-gray.vercel.app",
     "https://*.vercel.app",
 ]
-
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # SOCIAL AUTH PIPELINE

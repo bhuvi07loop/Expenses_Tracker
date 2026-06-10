@@ -9,9 +9,12 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
 
-<link rel="stylesheet" href="{% static 'style.css' %}?v=32">
+  <link rel="stylesheet" href="{% static 'style.css' %}?v=33">
 </head>
 
 <body
@@ -166,9 +169,14 @@
 
       <div class="nav-actions">
         <span class="logged-email" id="logged-email"></span>
+
+        <a href="/" class="btn-top-page" id="btn-dashboard-link">Dashboard</a>
+
         <button class="btn-reset" id="btn-open-reset" type="button">Reset</button>
+
         <button class="btn-top-page" id="btn-top-page" type="button">Page 2 →</button>
-        <button onclick="window.location.href='/logout/'">Logout</button>
+
+        <a href="/logout/" class="logout-btn" id="btn-logout-link">Logout</a>
       </div>
     </nav>
 
@@ -255,7 +263,7 @@
         </section>
 
         <p class="feedback-line">
-          € Feedback:
+          Feedback:
           <a href="mailto:bhuvanesh07web@gmail.com">bhuvanesh07web@gmail.com</a>
         </p>
 
@@ -413,6 +421,6 @@
 
   </div>
 
-  <script src="{% static 'script.js' %}?v=31" defer></script>
+  <script src="{% static 'script.js' %}?v=32" defer></script>
 </body>
 </html>
