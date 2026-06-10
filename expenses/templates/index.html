@@ -18,7 +18,7 @@
   <!-- Internet Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  <link rel="stylesheet" href="{% static 'style.css' %}?v=9999">
+  <link rel="stylesheet" href="{% static 'style.css' %}?v=2000">
 </head>
 
 <body
@@ -64,31 +64,6 @@
         </p>
       </div>
 
-      <div class="mini-cards">
-        <div class="mini-card">
-          <div class="card-icon">
-            <i class="bi bi-cash-stack"></i>
-          </div>
-          <h3>Income</h3>
-          <p>Monthly</p>
-        </div>
-
-        <div class="mini-card">
-          <div class="card-icon expense-icon">
-            <i class="bi bi-receipt-cutoff"></i>
-          </div>
-          <h3>Expenses</h3>
-          <p>Track</p>
-        </div>
-
-        <div class="mini-card">
-          <div class="card-icon saving-icon">
-            <i class="bi bi-graph-up-arrow"></i>
-          </div>
-          <h3>Invest</h3>
-          <p>Grow</p>
-        </div>
-      </div>
 
       <div class="login-card">
         <div class="login-card-head">
@@ -117,7 +92,7 @@
         </div>
       </div>
 
-      <p class="designer-credit">© designed by buvi 07</p>
+      <p class="designer-credit"> <\>  Designed by Bhuvanesh 🖤 </p>
     </section>
   </div>
 
@@ -225,10 +200,7 @@
           Reset
         </button>
 
-        <button class="btn-top-page" id="btn-top-page" type="button">
-          <i class="bi bi-arrow-right-circle-fill"></i>
-          Page 2
-        </button>
+        
 
         <a href="/logout/" class="logout-btn" id="btn-logout-link">
           <i class="bi bi-box-arrow-right"></i>
@@ -236,6 +208,14 @@
         </a>
       </div>
     </nav>
+    <div class="top-tabs-wrap">
+  <button class="top-tab active" id="tab-dashboard" type="button">
+    Dashboard
+  </button>
+  <button class="top-tab" id="tab-investments" type="button">
+    Investments
+  </button>
+</div>
 
     <div class="app-content">
 
@@ -255,7 +235,6 @@
               </div>
             </div>
 
-            <div class="dash-avatar" id="dash-avatar">A</div>
           </header>
 
           <section class="summary-grid">
@@ -310,46 +289,72 @@
               </div>
             </div>
           </div>
-
-          <div class="section-header">
-            <h2 class="section-title">Monthly Expenses</h2>
-            <button class="btn-primary small" id="btn-add-expense" type="button">
-              <i class="bi bi-plus-circle-fill"></i>
-              Add
-            </button>
-          </div>
-
-          <div id="expense-form" class="edit-panel hidden">
-            <div class="panel-inner">
-              <h3 id="expense-form-title">New Expense</h3>
-
-              <input type="text" id="exp-title" class="ft-input" placeholder="Expense title, e.g. Rent" maxlength="40" />
-
-              <div class="input-row">
-                <span class="input-prefix">₹</span>
-                <input type="number" id="exp-amount" class="ft-input" placeholder="Amount" min="0" />
-              </div>
-
-              <div class="btn-row">
-                <button class="btn-secondary" id="btn-cancel-expense" type="button">Cancel</button>
-                <button class="btn-primary" id="btn-save-expense" type="button">
-                  <i class="bi bi-check-circle-fill"></i>
-                  Save
+        <section class="expense-analytics-layout">
+            <div class="expense-left-panel">
+              <div class="section-header">
+                <h2 class="section-title">Monthly Expenses</h2>
+                <button class="btn-primary small" id="btn-add-expense" type="button">
+                  <i class="bi bi-plus-circle-fill"></i>
+                  Add
                 </button>
               </div>
-            </div>
-          </div>
 
-          <div id="expenses-list" class="items-list"></div>
+              <div id="expense-form" class="edit-panel hidden">
+                <div class="panel-inner">
+                  <h3 id="expense-form-title">New Expense</h3>
 
-          <section class="savings-bar-section">
-            <div class="sb-header">
-              <span>Savings Rate</span>
-              <span id="savings-pct" class="sb-pct">0%</span>
+                  <input type="text" id="exp-title" class="ft-input" placeholder="Expense title, e.g. Rent" maxlength="40" />
+
+                  <div class="input-row">
+                    <span class="input-prefix">₹</span>
+                    <input type="number" id="exp-amount" class="ft-input" placeholder="Amount" min="0" />
+                  </div>
+
+                  <div class="btn-row">
+                    <button class="btn-secondary" id="btn-cancel-expense" type="button">Cancel</button>
+                    <button class="btn-primary" id="btn-save-expense" type="button">
+                      <i class="bi bi-check-circle-fill"></i>
+                      Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="expense-list-box">
+                <div id="expenses-list" class="items-list vertical-expenses"></div>
+
+                <div class="view-all-wrap">
+                  <button class="btn-secondary" id="btn-toggle-expenses" type="button">
+                    View all
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="sb-track">
-              <div class="sb-fill" id="sb-fill"></div>
-            </div>
+
+            <aside class="analytics-right-panel">
+              <div class="expense-split-card">
+                <div class="donut-head small-head">
+                  <div>
+                    <p class="chart-kicker">Expense Split</p>
+                    <h3>By Title</h3>
+                  </div>
+                  <i class="bi bi-diagram-3-fill"></i>
+                </div>
+
+                <div class="expense-donut-wrap">
+                  <div class="expense-donut" id="expense-donut">
+                    <div class="expense-donut-center">
+                      <span id="expense-donut-main">0%</span>
+                      <small>Top Expense</small>
+                    </div>
+                  </div>
+
+                  <div id="expense-share-list" class="expense-share-list expense-donut-legend">
+                    <p class="empty-mini">No expense data yet</p>
+                  </div>
+                </div>
+              </div>
+            </aside>
           </section>
 
         </main>
@@ -548,6 +553,6 @@
     })();
   </script>
 
-  <script src="{% static 'script.js' %}?v=9999" defer></script>
+  <script src="{% static 'script.js' %}?v=2000" defer></script>
 </body>
 </html>

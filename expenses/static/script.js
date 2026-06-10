@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let pendingConfirmAction = null;
   let maturityManuallyEdited = false;
   let cloudSaveTimer = null;
+  let expensesExpanded = false;
 
   function clearLoginSessionOnly() {
     sessionStorage.clear();
@@ -72,14 +73,26 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function userKey(name) {
-    const email = cleanEmail(currentEmail || localStorage.getItem("wealth_current_email") || "guest");
+    const email = cleanEmail(
+      currentEmail || localStorage.getItem("wealth_current_email") || "guest"
+    );
     return "wealth_" + email + "_" + name;
   }
 
   function loadUserData() {
     currentEmail = cleanEmail(djangoEmail || localStorage.getItem("wealth_current_email"));
-    expenses = JSON.parse(localStorage.getItem(userKey("expenses")) || "[]");
-    investments = JSON.parse(localStorage.getItem(userKey("investments")) || "[]");
+
+    try {
+      expenses = JSON.parse(localStorage.getItem(userKey("expenses")) || "[]");
+    } catch {
+      expenses = [];
+    }
+
+    try {
+      investments = JSON.parse(localStorage.getItem(userKey("investments")) || "[]");
+    } catch {
+      investments = [];
+    }
   }
 
   function saveUserData() {
@@ -163,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const response = await fetch("/api/finance/", {
         method: "GET",
         headers: {
-          "Accept": "application/json",
+          Accept: "application/json",
         },
       });
 
@@ -173,8 +186,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       currentEmail = cleanEmail(data.email || currentEmail);
 
-      // First time: if database is empty but this device already has values,
-      // upload this device values to database.
       if (!data.has_data && localHadData) {
         await saveToDatabaseNow();
         return;
@@ -213,15 +224,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-    function saveToDatabaseDebounced() {
-      if (!djangoAuth || !currentEmail) return;
+  function saveToDatabaseDebounced() {
+    if (!djangoAuth || !currentEmail) return;
 
-      clearTimeout(cloudSaveTimer);
+    clearTimeout(cloudSaveTimer);
 
-      cloudSaveTimer = setTimeout(() => {
-        saveToDatabaseNow();
-      }, 500);
-    }
+    cloudSaveTimer = setTimeout(() => {
+      saveToDatabaseNow();
+    }, 500);
+  }
 
   function resetCurrentUserValues() {
     localStorage.removeItem(userKey("income"));
@@ -241,9 +252,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     setPage(1);
     renderAll();
+    saveToDatabaseDebounced();
   }
 
-  function setTheme(theme) {
+  function setTheme(theme = "dark") {
     const nextTheme = theme === "light" ? "light" : "dark";
 
     root.setAttribute("data-theme", nextTheme);
@@ -263,13 +275,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const confirmText = options.confirmText || "Yes, continue";
     const danger = options.danger !== false;
 
-    pendingConfirmAction = typeof options.onConfirm === "function" ? options.onConfirm : null;
+    pendingConfirmAction =
+      typeof options.onConfirm === "function" ? options.onConfirm : null;
 
     if ($("confirm-title")) $("confirm-title").textContent = title;
     if ($("confirm-message")) $("confirm-message").textContent = message;
 
     if ($("btn-confirm-ok")) {
-      $("btn-confirm-ok").innerHTML = `<i class="bi bi-check-circle-fill"></i> ${confirmText}`;
+      $("btn-confirm-ok").innerHTML =
+        `<i class="bi bi-check-circle-fill"></i> ${confirmText}`;
       $("btn-confirm-ok").className = danger ? "btn-danger" : "btn-primary";
     }
 
@@ -315,7 +329,8 @@ document.addEventListener("DOMContentLoaded", function () {
   async function showApp() {
     if (!login || !app) return;
 
-    await loadUserData();
+    loadUserData();
+    await loadFromDatabase();
 
     login.classList.add("hidden");
     login.classList.remove("active");
@@ -342,8 +357,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if ($("logged-email")) $("logged-email").textContent = currentEmail;
   }
 
-  // Default theme is dark.
-  // This fixes old saved light theme one time.
   if (localStorage.getItem("wealth_dark_default_fixed") !== "1") {
     localStorage.setItem("wealth_theme", "dark");
     localStorage.setItem("wealth_dark_default_fixed", "1");
@@ -400,7 +413,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       openConfirm({
         title: "Logout?",
-        message: "Your saved values will remain safe for this email. You can login again anytime.",
+        message:
+          "Your saved values will remain safe for this email. You can login again anytime.",
         confirmText: "Logout",
         danger: true,
         onConfirm: () => {
@@ -502,6 +516,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function updateTopTabs(pageNum) {
+    if ($("tab-dashboard")) $("tab-dashboard").classList.toggle("active", pageNum === 1);
+    if ($("tab-investments")) $("tab-investments").classList.toggle("active", pageNum === 2);
+  }
+
   function setPage(num, persist = true) {
     const pageNum = num === 2 ? 2 : 1;
     const isPage2 = pageNum === 2;
@@ -509,22 +528,19 @@ document.addEventListener("DOMContentLoaded", function () {
     if ($("pg-dashboard")) $("pg-dashboard").classList.toggle("active", !isPage2);
     if ($("pg-investments")) $("pg-investments").classList.toggle("active", isPage2);
 
-    if ($("btn-top-page")) {
-      $("btn-top-page").innerHTML = isPage2
-        ? '<i class="bi bi-arrow-left-circle-fill"></i> Page 1'
-        : '<i class="bi bi-arrow-right-circle-fill"></i> Page 2';
-    }
+    updateTopTabs(pageNum);
 
     if (persist && currentEmail) {
       saveActivePage(pageNum);
     }
   }
 
-  if ($("btn-top-page")) {
-    $("btn-top-page").addEventListener("click", () => {
-      const isPage2 = $("pg-investments")?.classList.contains("active");
-      setPage(isPage2 ? 1 : 2);
-    });
+  if ($("tab-dashboard")) {
+    $("tab-dashboard").addEventListener("click", () => setPage(1));
+  }
+
+  if ($("tab-investments")) {
+    $("tab-investments").addEventListener("click", () => setPage(2));
   }
 
   if ($("btn-edit-income")) {
@@ -587,6 +603,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function getVisibleExpenses() {
+    if (expensesExpanded) return expenses;
+    return expenses.slice(0, 3);
+  }
+
   function renderExpenses() {
     const list = $("expenses-list");
     if (!list) return;
@@ -602,10 +623,18 @@ document.addEventListener("DOMContentLoaded", function () {
           <p>No expenses yet. Tap <strong>+ Add</strong> to begin.</p>
         </div>
       `;
+
+      if ($("btn-toggle-expenses")) {
+        $("btn-toggle-expenses").style.display = "none";
+      }
       return;
     }
 
-    expenses.forEach((item, index) => {
+    const visibleExpenses = getVisibleExpenses();
+
+    visibleExpenses.forEach((item) => {
+      const realIndex = expenses.indexOf(item);
+
       const div = document.createElement("div");
       div.className = "item-card";
       div.innerHTML = `
@@ -616,11 +645,11 @@ document.addEventListener("DOMContentLoaded", function () {
         <div>
           <div class="item-amount">${money(item.amount)}</div>
           <div class="item-actions">
-            <button class="mini-btn" data-edit-exp="${index}">
+            <button class="mini-btn" data-edit-exp="${realIndex}">
               <i class="bi bi-pencil-square"></i>
               Edit
             </button>
-            <button class="mini-btn delete" data-del-exp="${index}">
+            <button class="mini-btn delete" data-del-exp="${realIndex}">
               <i class="bi bi-trash3-fill"></i>
               Delete
             </button>
@@ -658,6 +687,23 @@ document.addEventListener("DOMContentLoaded", function () {
           },
         });
       });
+    });
+
+    if ($("btn-toggle-expenses")) {
+      if (expenses.length <= 3) {
+        $("btn-toggle-expenses").style.display = "none";
+      } else {
+        $("btn-toggle-expenses").style.display = "inline-flex";
+        $("btn-toggle-expenses").textContent =
+          expensesExpanded ? "View less" : "View all";
+      }
+    }
+  }
+
+  if ($("btn-toggle-expenses")) {
+    $("btn-toggle-expenses").addEventListener("click", () => {
+      expensesExpanded = !expensesExpanded;
+      renderExpenses();
     });
   }
 
@@ -740,7 +786,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (monthlyAmount <= 0 || months <= 0) return 0;
 
       const principalTotal = monthlyAmount * months;
-      const interestApprox = monthlyAmount * months * (months + 1) * rate / 24;
+      const interestApprox = (monthlyAmount * months * (months + 1) * rate) / 24;
 
       return Math.round(principalTotal + interestApprox);
     }
@@ -1065,22 +1111,110 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function clampPercent(value) {
+    return Math.max(0, Math.min(100, Math.round(value || 0)));
+  }
+
+  function updateExpenseSplit(totalExpenses) {
+    const donut = $("expense-donut");
+    const wrap = $("expense-share-list");
+
+    if (!donut || !wrap) return;
+
+    if (!expenses.length || totalExpenses <= 0) {
+      donut.style.setProperty(
+        "--expense-donut-bg",
+        "conic-gradient(#334155 0deg 360deg)"
+      );
+      if ($("expense-donut-main")) $("expense-donut-main").textContent = "0%";
+      wrap.innerHTML = `<p class="empty-mini">No expense data yet</p>`;
+      return;
+    }
+
+    const colors = [
+      "#ef4444",
+      "#f59e0b",
+      "#2563eb",
+      "#10b981",
+      "#111827",
+      "#8b5cf6",
+      "#06b6d4",
+    ];
+
+    const sorted = [...expenses]
+      .map((item) => ({
+        title: item.title || "Expense",
+        amount: Number(item.amount || 0),
+      }))
+      .filter((item) => item.amount > 0)
+      .sort((a, b) => b.amount - a.amount);
+
+    let startDeg = 0;
+
+    const gradientParts = sorted.map((item, index) => {
+      const pct = totalExpenses > 0 ? item.amount / totalExpenses : 0;
+      const deg = pct * 360;
+      const endDeg = startDeg + deg;
+      const color = colors[index % colors.length];
+
+      const part = `${color} ${startDeg}deg ${endDeg}deg`;
+      startDeg = endDeg;
+
+      return part;
+    });
+
+    donut.style.setProperty(
+      "--expense-donut-bg",
+      `conic-gradient(${gradientParts.join(", ")})`
+    );
+
+    const topPct = Math.round((sorted[0].amount / totalExpenses) * 100);
+    if ($("expense-donut-main")) $("expense-donut-main").textContent = topPct + "%";
+
+    wrap.innerHTML = sorted
+      .map((item, index) => {
+        const pct = Math.round((item.amount / totalExpenses) * 100);
+        const color = colors[index % colors.length];
+
+        return `
+          <div class="expense-donut-legend-row">
+            <div class="expense-legend-left">
+              <span class="expense-color-dot" style="background:${color};"></span>
+              <div>
+                <strong>${esc(item.title)}</strong>
+                <span>${pct}% of expenses</span>
+              </div>
+            </div>
+            <b>${money(item.amount)}</b>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
   function renderSummary() {
     const income = getIncome();
-    const totalExpenses = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
-    const savings = income - totalExpenses;
-    const pct = income > 0 ? Math.max(0, Math.round((savings / income) * 100)) : 0;
+
+    const totalExpenses = expenses.reduce((sum, item) => {
+      return sum + Number(item.amount || 0);
+    }, 0);
 
     const totalInv = investments.reduce((sum, item) => {
       return sum + investmentDisplayAmount(item);
     }, 0);
 
+    const netSavings = income - totalExpenses;
+    const savedPct = income > 0 ? (netSavings / income) * 100 : 0;
+
     if ($("sum-income")) $("sum-income").textContent = money(income);
     if ($("sum-expenses")) $("sum-expenses").textContent = money(totalExpenses);
-    if ($("sum-savings")) $("sum-savings").textContent = money(savings);
-    if ($("savings-pct")) $("savings-pct").textContent = pct + "%";
-    if ($("sb-fill")) $("sb-fill").style.width = Math.min(pct, 100) + "%";
+    if ($("sum-savings")) $("sum-savings").textContent = money(netSavings);
     if ($("inv-total")) $("inv-total").textContent = money(totalInv);
+
+    if ($("savings-pct")) $("savings-pct").textContent = clampPercent(savedPct) + "%";
+    if ($("sb-fill")) $("sb-fill").style.width = clampPercent(savedPct) + "%";
+
+    updateExpenseSplit(totalExpenses);
   }
 
   function renderAll() {
